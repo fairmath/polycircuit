@@ -19,56 +19,44 @@ SignumCKKS::SignumCKKS(std::string ccLocation, std::string pubKeyLocation, std::
     initCC();
 };
 
-void SignumCKKS::initCC()
-{
-    if (!Serial::DeserializeFromFile(m_CCLocation, m_cc, SerType::JSON))
-    {
+void SignumCKKS::initCC(){
+    if (!Serial::DeserializeFromFile(m_CCLocation, m_cc, SerType::JSON)){
         std::cerr << "Could not deserialize cryptocontext file" << std::endl;
         std::exit(1);
     }
     
-    if (!Serial::DeserializeFromFile(m_PubKeyLocation, m_PublicKey, SerType::BINARY))
-    {
+    if (!Serial::DeserializeFromFile(m_PubKeyLocation, m_PublicKey, SerType::BINARY)){
         std::cerr << "Could not deserialize public key file" << std::endl;
         std::exit(1);
     }
     
     std::ifstream multKeyIStream(m_MultKeyLocation, std::ios::in | std::ios::binary);
-    if (!multKeyIStream.is_open())
-    {
+    if (!multKeyIStream.is_open()){
         std::exit(1);
     }
-    //std::cout << "we are in des 1" << std::endl;
-    if (!m_cc->DeserializeEvalMultKey(multKeyIStream, SerType::BINARY))
-    {
+
+    if (!m_cc->DeserializeEvalMultKey(multKeyIStream, SerType::BINARY)){
         std::cerr << "Could not deserialize rot key file" << std::endl;
         std::exit(1);
     }
-    //std::cout << "we are in des 2" << std::endl;
+
     std::ifstream rotKeyIStream(m_RotKeyLocation, std::ios::in | std::ios::binary);
-    if (!rotKeyIStream.is_open())
-    {
+    if (!rotKeyIStream.is_open()){
         std::exit(1);
     }
-    //std::cout << "we are in des 3" << std::endl;
-    if (!m_cc->DeserializeEvalAutomorphismKey(rotKeyIStream, SerType::BINARY))
-    {
+
+    if (!m_cc->DeserializeEvalAutomorphismKey(rotKeyIStream, SerType::BINARY)){
         std::cerr << "Could not deserialize eval rot key file" << std::endl;
         std::exit(1);
     }
-    //std::cout << "we are in des 4" << std::endl;
-    if (!Serial::DeserializeFromFile(m_InputLocation, m_InputC, SerType::BINARY))
-    {
+
+    if (!Serial::DeserializeFromFile(m_InputLocation, m_InputC, SerType::BINARY)){
         std::cerr << "Could not deserialize input file" << std::endl;
         std::exit(1);
     }
-    //std::cout << "we are in des " << std::endl;
-    
-    
 }
 
-void SignumCKKS::eval()
-{
+void SignumCKKS::eval(){
 	m_cc->Enable(ADVANCEDSHE);
 	
 	m_OutputC=m_cc->EvalChebyshevSeries(m_InputC, coeff_val,-1, 1);
@@ -79,119 +67,113 @@ void SignumCKKS::eval()
     
     //--CHEBYSHEV series computation <--- this is very naively implemented---
 
-    for (int i=2;i<l+1;i++){
-        
-            int j=int((i-1)/2) +1;
-            auto prod = m_cc->EvalMult(t[j], t[i-j]);
-            t[i]  = m_cc->EvalAdd(prod, prod);
-            if(2*j==i)
-                m_cc->EvalSubInPlace(t[i], 1);
-            else
-                m_cc->EvalSubInPlace(t[i], t[2*j-i]);
+    for (int i=2;i<l+1;i++){        
+        int j=int((i-1)/2) +1;
+        auto prod = m_cc->EvalMult(t[j], t[i-j]);
+        t[i]  = m_cc->EvalAdd(prod, prod);
+        if(2*j==i)
+            m_cc->EvalSubInPlace(t[i], 1);
+        else
+            m_cc->EvalSubInPlace(t[i], t[2*j-i]);
     }
     
     
     //----------------------------  T1009,T1011,T1013,T1015 -----------------------------
 	
-	
-	std::vector<double> coeff_val2({5.3627954846304366e-05,  -4.766676484102891e-05,  4.170646728565051e-05, -3.574695081520454e-05
-     });
+	std::vector<double> coeff_val2({5.3627954846304366e-05,  -4.766676484102891e-05,  4.170646728565051e-05, -3.574695081520454e-05});
     int len=4;
 
     for(int i=0;i<len;i++){
 
-     double coeff=coeff_val2[i];
-    auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*64),t[16]);
-    auto temp2=m_cc->EvalMult(t[15-2*i],coeff*32);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[32]);
-    temp2=m_cc->EvalMult(t[15-2*i],coeff*16);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[64]);
-    temp2=m_cc->EvalMult(t[15-2*i],coeff*8);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[128]);
-    temp2=m_cc->EvalMult(t[15-2*i],coeff*4);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[256]);
-    temp2=m_cc->EvalMult(t[15-2*i],coeff*2);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[512]);
-    temp2=m_cc->EvalMult(t[15-2*i],coeff);
-    auto t59=m_cc->EvalSub(temp1,temp2);
-    
-    m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
+        double coeff=coeff_val2[i];
+        auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*64),t[16]);
+        auto temp2=m_cc->EvalMult(t[15-2*i],coeff*32);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[32]);
+        temp2=m_cc->EvalMult(t[15-2*i],coeff*16);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[64]);
+        temp2=m_cc->EvalMult(t[15-2*i],coeff*8);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[128]);
+        temp2=m_cc->EvalMult(t[15-2*i],coeff*4);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[256]);
+        temp2=m_cc->EvalMult(t[15-2*i],coeff*2);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[512]);
+        temp2=m_cc->EvalMult(t[15-2*i],coeff);
+        auto t59=m_cc->EvalSub(temp1,temp2);
+
+        m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
     }
-    
     
     //----------------------------  T1017,T1019 -----------------------------
 
-    std::vector<double> coeff_val3({
-  2.9788103390049553e-05, -2.3829813764789798e-05   });
-     len=2;
+    std::vector<double> coeff_val3({2.9788103390049553e-05, -2.3829813764789798e-05   });
+    len=2;
 
     for(int i=0;i<len;i++){
 
-     double coeff=coeff_val3[i];
-    auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*128),t[8]);
-    auto temp2=m_cc->EvalMult(t[7-2*i],coeff*64);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[16]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff*32);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[32]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff*16);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[64]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff*8);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[128]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff*4);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[256]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff*2);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[512]);
-    temp2=m_cc->EvalMult(t[7-2*i],coeff);
-    auto t59=m_cc->EvalSub(temp1,temp2);
-    
-    m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
-    }
+        double coeff=coeff_val3[i];
+        auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*128),t[8]);
+        auto temp2=m_cc->EvalMult(t[7-2*i],coeff*64);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[16]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff*32);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[32]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff*16);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[64]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff*8);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[128]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff*4);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[256]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff*2);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[512]);
+        temp2=m_cc->EvalMult(t[7-2*i],coeff);
+        auto t59=m_cc->EvalSub(temp1,temp2);
 
+        m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
+    }
     
     //----------------------------  T1021 -----------------------------
-     std::vector<double> coeff_val4({1.7871969994745013e-05});
-     len=1;
+    std::vector<double> coeff_val4({1.7871969994745013e-05});
+    len=1;
 
     for(int i=0;i<len;i++){
 
-     double coeff=coeff_val4[i];
-    auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*256),t[4]);
-    auto temp2=m_cc->EvalMult(t[3-2*i],coeff*128);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[8]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*64);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[16]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*32);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[32]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*16);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[64]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*8);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[128]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*4);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[256]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff*2);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[512]);
-    temp2=m_cc->EvalMult(t[3-2*i],coeff);
-    auto t59=m_cc->EvalSub(temp1,temp2);
-    
-    m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
+        double coeff=coeff_val4[i];
+        auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*256),t[4]);
+        auto temp2=m_cc->EvalMult(t[3-2*i],coeff*128);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[8]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*64);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[16]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*32);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[32]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*16);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[64]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*8);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[128]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*4);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[256]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff*2);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[512]);
+        temp2=m_cc->EvalMult(t[3-2*i],coeff);
+        auto t59=m_cc->EvalSub(temp1,temp2);
+
+        m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
     }
     
     
@@ -201,47 +183,41 @@ void SignumCKKS::eval()
 
     for(int i=0;i<len;i++){
 
-     double coeff=coeff_val5[i];
-    auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*512),t[2]);
-    auto temp2=m_cc->EvalMult(t[1-2*i],coeff*256);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[4]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*128);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[8]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*64);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[16]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*32);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[32]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*16);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[64]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*8);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[128]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*4);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[256]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff*2);
-    temp1=m_cc->EvalSub(temp1,temp2);
-    temp1=m_cc->EvalMult(temp1,t[512]);
-    temp2=m_cc->EvalMult(t[1-2*i],coeff);
-    auto t59=m_cc->EvalSub(temp1,temp2);
-    
-    m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
+        double coeff=coeff_val5[i];
+        auto temp1=m_cc->EvalMult(m_cc->EvalMult(t[1+2*i],coeff*512),t[2]);
+        auto temp2=m_cc->EvalMult(t[1-2*i],coeff*256);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[4]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*128);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[8]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*64);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[16]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*32);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[32]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*16);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[64]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*8);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[128]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*4);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[256]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff*2);
+        temp1=m_cc->EvalSub(temp1,temp2);
+        temp1=m_cc->EvalMult(temp1,t[512]);
+        temp2=m_cc->EvalMult(t[1-2*i],coeff);
+        auto t59=m_cc->EvalSub(temp1,temp2);
+
+        m_OutputC=m_cc->EvalAdd(m_OutputC,t59);
     }
-
-
-	
-	
 }
 
-void SignumCKKS::deserializeOutput()
-{
-    if (!Serial::SerializeToFile(m_OutputLocation, m_OutputC, SerType::BINARY))
-    {
+void SignumCKKS::deserializeOutput(){
+    if (!Serial::SerializeToFile(m_OutputLocation, m_OutputC, SerType::BINARY)){
         std::cerr << " Error writing ciphertext 1" << std::endl;
     }
 }

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "signum/ckks.hpp"
+#include "sigmoid/ckks.hpp"
 
 using namespace lbcrypto;
 
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    SignumCKKS sigmoidCCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, inputLocation,
+    SigmoidCKKS sigmoidCCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, inputLocation,
                              outputLocation);
     sigmoidCCKKS.eval();
     sigmoidCCKKS.deserializeOutput();
