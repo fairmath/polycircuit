@@ -1,10 +1,12 @@
 set(LIBRARY_SOURCES
     signum/ckks.cpp
+    matrix_mult/ckks.cpp
 )
 
 # Optionally, specify headers for IDEs
 set(LIBRARY_HEADERS
     signum/ckks.hpp
+    matrix_mult/ckks.hpp
 )
 
 # Define the library
