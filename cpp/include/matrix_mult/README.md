@@ -12,7 +12,7 @@ This component provides an efficient and scalable solution for encrypted matrix 
 
 This solution outperforms existing methods like [1](https://eprint.iacr.org/2023/1649.pdf) and [2](https://eprint.iacr.org/2018/1041.pdf) by consuming only $\mathcal{O}(\log_2{d})$ rotations while still requiring a multiplicative depth of two.
 
-The optimized algorithm exhibits high parallelizability. To leverage it, consider using 'pragma omp parallel' before the `for` loops to enhance performance.
+The algorithm also exhibits high parallelizability. To enhance performance, consider using 'pragma omp parallel' before the `for` loops.
 
 ## Implementation
 
@@ -23,33 +23,11 @@ The solution is based on an adapted version of the Row-wise encoding algorithm f
    - For a square matrix with dimensions $d\times d$, requires $2 d+3\log_2(d)-2$ rotations and $2d$ multiplications
    - Drawback: necessity for $d^3$ slots packing availability, which limits scalability.
    
-The adapted technique is outlined in Algorithm~\ref{algo:mult_1}; it utilizes column and row masks ($\pi_i$ and $\psi_i$, respectively). The complexity of this adaptation is $2d+d\log_2{d}-1$ rotations and $3d$ multiplications.
+The adapted technique utilizes column and row masks ($\pi_i$ and $\psi_i$, respectively). The complexity of this adaptation is $2d+d\log_2{d}-1$ rotations and $3d$ multiplications.
 
-**Algorithm 1** Matrix.Mult (1 Matrix packing version of [this work](https://eprint.iacr.org/2023/1649.pdf))\
-**Require:** $A,B \leftarrow$ row_enc $(\mathtt{A_{d\times d}},\mathtt{B_{d\times d}})$\
-**Out:** $C=$ row_enc $(\mathtt{A_{d\times d}}\times\mathtt{B_{d\times d}})$
+Since it is possible to pack two matrices into one ciphertext, the algorithm is optimized to consume $2d+d\log_2{d}-1$ rotations and $\frac{5d}{2}$ multiplications. This is achieved by aligning rotations at Steps 3 and 8 and then packing two ciphertexts, thus leading to a significant reduction in the number of rotations. Both ciphertexts $A$ and $B$ undergo pre-processing. Following this packing strategy, only $d\log_2{d}+1$ rotations and $\frac{3d}{2}$ multiplications are required for the subsequent steps.
 
-`// Preprocess A`\
-1: **for** $j=0$ to $d-1$ **do**\
-2: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{cMult}(A, \pi_{j} )$\
-3: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{Rot}(\tilde{A}[j],-j)$\
-4: &nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$}	**do**\
-5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] +=  \texttt{Rot}(\tilde{A}[j], -(2^i) )$
-
-`// Preprocess B`\
-6: **for** $j=0$ to $d-1$ **do**\
-7: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{cMult}(B, \psi_{j} )$\
-8: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{Rot}(\tilde{B}[j],-j*d)$\
-9: &nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$ **do**\
-10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] += \texttt{Rot}(\tilde{B}[j], -(2^i)*d )$
- 
-`// Compute C`\
-11: **for** $j=0$ to $d-1$ **do**\
-12: &nbsp;&nbsp;&nbsp;&nbsp;$C += \texttt{cMult}(\tilde{A}[j],\tilde{B}[j] )$
-
-Since it is possible to pack two matrices into one ciphertext, the algorithm was optimized to consume $2d+d\log_2{d}-1$ rotations and $\frac{5d}{2}$ multiplications. This is achieved by aligning rotations at Steps 3 and 8 and then packing two ciphertexts, thus leading to a significant reduction in the number of rotations. The Algorithm~\ref{algo:mult_2} presents this approach, where both ciphertexts $A$ and $B$ undergo pre-processing. Following this packing strategy, only $d\log_2{d}+1$ rotations and $\frac{3d}{2}$ multiplications are required for the subsequent steps.
-
-**Algorithm 2** Optimized.Matrix.Mult\
+**Algorithm** Optimized.Matrix.Mult\
 **Require:** $A,B \leftarrow$ row_enc $(\mathtt{A_{d\times d}},\mathtt{B_{d\times d}})$\
 **Out:** $C=$ row_enc $(\mathtt{A_{d\times d}}\times\mathtt{B_{d\times d}})$
 
