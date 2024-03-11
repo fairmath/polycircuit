@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
     std::string inputLocation;
     std::string outputLocation;
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
     for (int i = 1; i < argc; i += 2) {
         std::string arg = argv[i];
         if (arg == "--key_pub") {
@@ -32,7 +31,7 @@ int main(int argc, char *argv[]) {
     }
 
     SignumCKKS sigmoidCCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, inputLocation,
-                             outputLocation);
+                            outputLocation);
     sigmoidCCKKS.eval();
     sigmoidCCKKS.deserializeOutput();
     return 0;

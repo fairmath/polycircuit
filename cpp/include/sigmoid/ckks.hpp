@@ -1,6 +1,4 @@
 #include "openfhe.h"
-
-// header files needed for serialization
 #include "ciphertext-ser.h"
 #include "cryptocontext-ser.h"
 #include "key/key-ser.h"
@@ -9,10 +7,10 @@
 using namespace lbcrypto;
 
 class SigmoidCKKS {
-    CryptoContext<DCRTPoly> m_cc;
-    PublicKey<DCRTPoly> m_PublicKey;
-    Ciphertext<DCRTPoly> m_InputC;
-    Ciphertext<DCRTPoly> m_OutputC;
+    CryptoContext <DCRTPoly> m_cc;
+    PublicKey <DCRTPoly> m_PublicKey;
+    Ciphertext <DCRTPoly> m_InputC;
+    Ciphertext <DCRTPoly> m_OutputC;
     std::string m_PubKeyLocation;
     std::string m_MultKeyLocation;
     std::string m_RotKeyLocation;
@@ -30,6 +28,6 @@ public:
 
     void eval();
 
-    void deserializeOutput();
+    void serializeOutput();
 
 };
