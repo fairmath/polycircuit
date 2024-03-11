@@ -1,6 +1,6 @@
 # Matrix Multiplication component
 
-The winning solution for the FHErma [Matrix Multiplication challenge](https://fherma.io/challenges/652bf669485c878710fd020b).
+The winning solution for the FHERMA [Matrix Multiplication challenge](https://fherma.io/challenges/652bf669485c878710fd020b).
 
 For a more comprehensive analysis check out the [blog post](https://fherma.io/content/65de4152bfa5f4ea4471701e) by the challenge's winner, [Aikata](https://www.iaik.tugraz.at/person/aikata-aikata/), a Ph.D. student at TU Graz.
 
@@ -38,21 +38,21 @@ Following this packing strategy, only $d+d\log_2{d}+1$ rotations and $\frac{d}{2
 **Require:** $A,B \leftarrow$ row_enc $(\mathtt{A_{d\times d}},\mathtt{B_{d\times d}})$\
 **Out:** $C=$ row_enc $(\mathtt{A_{d\times d}}\times\mathtt{B_{d\times d}})$
 
+
 `// Preprocess A`\
-1: $A +=  \texttt{Rot}(A, -d*d+1 )$\
-2: **for** $j=0$ to $(d/2)-1$} **do**\
-3: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{cMult}(A, \pi_{j,j+d*d} )$\
-4: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{Rot}(\tilde{A}[j],-2j)$\
-5: &nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$ **do**\
-6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] +=  \texttt{Rot}(\tilde{A}[j], -(2^i) )$
+1: &nbsp;$A +=  \texttt{Rot}(A, -d*d+1 )$\
+2: &nbsp;**for** $j=0$ to $(d/2)-1$ **do**\
+3: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{cMult}(A, \pi_{j,j+d*d} )$ `// Splitting A column-wise`\
+4: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] \leftarrow  \texttt{Rot}(\tilde{A}[j],-2j)$ `// Right align all the columns`\
+5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$ **do** `// Replicate the columns`\
+6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{A}[j] +=  \texttt{Rot}(\tilde{A}[j], -(2^i) )$
 
 `// Preprocess B`\
-7: $B +=  \texttt{Rot}(B, -d*d+d )$\
-8: **for** $j=0$ to $(d/2)-1$ **do**\
-9: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{cMult}(B, \psi_{j,j+d*d} )$
-
-10: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{Rot}(\tilde{B}[j],-2j*d)$\
-11: &nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$ **do**\
+7: &nbsp;$B +=  \texttt{Rot}(B, -d*d+d )$\
+8: &nbsp;**for** $j=0$ to $(d/2)-1$ **do**\
+9: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{cMult}(B, \psi_{j,j+d*d} )$ `// Splitting B row-wise`\
+10: &nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] \leftarrow  \texttt{Rot}(\tilde{B}[j],-2j*d)$ `// Top align all the rows`\
+11: &nbsp;&nbsp;&nbsp;&nbsp;**for** $i=0$ to $\log_2(d)-1$ **do** `// Replicate the rows`\
 12: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\tilde{B}[j] +=  \texttt{Rot}(\tilde{B}[j], -(2^i)*d )$
 
 `// Compute C`\
@@ -62,7 +62,7 @@ Following this packing strategy, only $d+d\log_2{d}+1$ rotations and $\frac{d}{2
 
 ## Future improvements
 
-The proposed approach, tailored to the constraints of the FHErma challenge, like the available packing $2d^2$ for matrix dimension $d$, presents further opportunities for exploration.
+The proposed approach, tailored to the constraints of the FHERMA challenge, like the available packing $2d^2$ for matrix dimension $d$, presents further opportunities for exploration.
 Notably, the scalability of this approach improves with higher packing availability.
 Extending and applying the proposed approach to rectangular matrices and scenarios involving smaller matrix filters applied to a matrix present intriguing possibilities for future exploration.
 Generalizing the algorithm to handle different matrix shapes and sizes could enhance its versatility and applicability in various contexts within the field of privacy-preserving matrix multiplication.
