@@ -21,17 +21,17 @@ One common method for approximating the logistic function involves employing the
 However, the Chebyshev series provides results over the domain [−1, 1].
 To apply the Chebyshev series to broader ranges (e.g., $[a,b]$), the input polynomial (e.g., $x$) is scaled to bring it to the interval $[-1,1]$ as outlined below, ensuring the applicability of the Chebyshev approximation.
 
-\begin{align}
-x' & = \frac{2x - (b+a)}{b-a}
-\end{align}
+$$
+x' = \frac{2x - (b+a)}{b-a}
+$$
 
-\begin{align}
-x' & = \frac{x}{\omega}
-\end{align}
+$$
+x' = \frac{x}{\omega}
+$$
 
-\begin{align}
+$$
 \text{ when } |a|=|b|, a \neq b,\text{ and }\omega=|b|
-\end{align}
+$$
 
 The scaled ciphertext $x'$ is subsequently employed for the approximation.
 Note that this scaling results in the loss of one multiplicative depth.
