@@ -7,10 +7,10 @@
 using namespace lbcrypto;
 
 class SigmoidCKKS {
-    CryptoContext <DCRTPoly> m_cc;
-    PublicKey <DCRTPoly> m_PublicKey;
-    Ciphertext <DCRTPoly> m_InputC;
-    Ciphertext <DCRTPoly> m_OutputC;
+    CryptoContext<DCRTPoly> m_cc;
+    PublicKey<DCRTPoly> m_PublicKey;
+    Ciphertext<DCRTPoly> m_InputC;
+    Ciphertext<DCRTPoly> m_OutputC;
     std::string m_PubKeyLocation;
     std::string m_MultKeyLocation;
     std::string m_RotKeyLocation;
@@ -20,14 +20,11 @@ class SigmoidCKKS {
 
 public:
     SigmoidCKKS(std::string ccLocation, std::string pubKeyLocation, std::string multKeyLocation,
-                std::string rotKeyLocation,
-                std::string inputLocation,
-                std::string outputLocation);
+                std::string rotKeyLocation, std::string inputLocation, std::string outputLocation);
 
     void initCC();
 
     void eval();
 
     void serializeOutput();
-
 };

@@ -4,16 +4,11 @@ int n = 64;
 int n_log = 6;
 
 MatrixMultCKKS::MatrixMultCKKS(std::string ccLocation, std::string pubKeyLocation, std::string multKeyLocation,
-                               std::string rotKeyLocation,
-                               std::string matrixALocation,
-                               std::string matrixBLocation,
-                               std::string outputLocation) : m_PubKeyLocation(pubKeyLocation),
-                                                             m_MultKeyLocation(multKeyLocation),
-                                                             m_RotKeyLocation(rotKeyLocation),
-                                                             m_CCLocation(ccLocation),
-                                                             m_MatrixALocation(matrixALocation),
-                                                             m_MatrixBLocation(matrixBLocation),
-                                                             m_OutputLocation(outputLocation) {
+                               std::string rotKeyLocation, std::string matrixALocation, std::string matrixBLocation,
+                               std::string outputLocation) :
+    m_PubKeyLocation(pubKeyLocation),
+    m_MultKeyLocation(multKeyLocation), m_RotKeyLocation(rotKeyLocation), m_CCLocation(ccLocation),
+    m_MatrixALocation(matrixALocation), m_MatrixBLocation(matrixBLocation), m_OutputLocation(outputLocation) {
     initCC();
 };
 
@@ -62,18 +57,18 @@ void MatrixMultCKKS::initCC() {
 
 void MatrixMultCKKS::eval() {
     std::vector<double> mask1(2 * n * n, 0);
-    std::vector <std::vector<double>> mask;
+    std::vector<std::vector<double>> mask;
     mask.push_back(mask1);
     mask.push_back(mask1);
 
-    std::vector <Ciphertext<DCRTPoly>> out(32);
-    std::vector <Plaintext> plaintext_mask(2);
+    std::vector<Ciphertext<DCRTPoly>> out(32);
+    std::vector<Plaintext> plaintext_mask(2);
 
 #pragma omp parallel for collapse(2)
     for (int k = 0; k < 4; k++) {
         for (int i = 0; i < n; i++) {
             int t = (k % 2) * (i) + (1 - (k % 2)) * (i * n);
-            mask[(k % 2)][t + (int) (k / 2) * n * n] = 1;
+            mask[(k % 2)][t + (int)(k / 2) * n * n] = 1;
         }
     }
 
@@ -91,8 +86,8 @@ void MatrixMultCKKS::eval() {
     }
 
 #pragma omp parallel for shared(m_MatrixAC, m_MatrixBC, plaintext_mask)
-    for (int t = 0; t < (int) (n / 2); t++) {
-        std::vector <Ciphertext<DCRTPoly>> ab1(2), ab2(2);
+    for (int t = 0; t < (int)(n / 2); t++) {
+        std::vector<Ciphertext<DCRTPoly>> ab1(2), ab2(2);
         if (t != 0) {
 
             ab1[0] = m_cc->EvalRotate(m_MatrixAC, 2 * t);
@@ -101,7 +96,6 @@ void MatrixMultCKKS::eval() {
         } else {
             ab1[0] = m_MatrixAC;
             ab1[1] = m_MatrixBC;
-
         }
 
         for (int j = 0; j < 2; j++) {
@@ -116,10 +110,10 @@ void MatrixMultCKKS::eval() {
         out[t] = m_cc->EvalMult(ab1[0], ab1[1]);
     }
 
-    for (int i = 1; i <= (int) (log2(n / 2)); i++) {
+    for (int i = 1; i <= (int)(log2(n / 2)); i++) {
 #pragma omp parallel for
-        for (int t = 0; t < (int) (n / pow(2, i + 1)); t++) {
-            m_cc->EvalAddInPlace(out[t], out[t + (int) (n / pow(2, i + 1))]);
+        for (int t = 0; t < (int)(n / pow(2, i + 1)); t++) {
+            m_cc->EvalAddInPlace(out[t], out[t + (int)(n / pow(2, i + 1))]);
         }
     }
 

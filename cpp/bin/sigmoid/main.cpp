@@ -36,4 +36,3 @@ int main(int argc, char *argv[]) {
     sigmoidCCKKS.deserializeOutput();
     return 0;
 }
-

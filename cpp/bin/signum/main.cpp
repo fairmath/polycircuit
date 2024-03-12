@@ -30,10 +30,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    SignumCKKS sigmoidCCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, inputLocation,
-                            outputLocation);
+    SignumCKKS sigmoidCCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, inputLocation, outputLocation);
     sigmoidCCKKS.eval();
     sigmoidCCKKS.deserializeOutput();
     return 0;
 }
-

@@ -8,8 +8,7 @@
 
 using namespace lbcrypto;
 
-class SignumCKKS
-{
+class SignumCKKS {
     CryptoContext<DCRTPoly> m_cc;
     PublicKey<DCRTPoly> m_PublicKey;
     Ciphertext<DCRTPoly> m_InputC;
@@ -23,9 +22,7 @@ class SignumCKKS
 
 public:
     SignumCKKS(std::string ccLocation, std::string pubKeyLocation, std::string multKeyLocation,
-               std::string rotKeyLocation,
-               std::string inputLocation,
-               std::string outputLocation);
+               std::string rotKeyLocation, std::string inputLocation, std::string outputLocation);
 
     void initCC();
 

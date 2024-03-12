@@ -34,8 +34,7 @@ int main(int argc, char *argv[]) {
     }
 
     MatrixMultCKKS matrixMultCKKS(ccLocation, pubKeyLocation, multKeyLocation, rotKeyLocation, matrixALocation,
-                                  matrixBLocation,
-                                  outputLocation);
+                                  matrixBLocation, outputLocation);
     matrixMultCKKS.eval();
     matrixMultCKKS.deserializeOutput();
     return 0;
