@@ -6,7 +6,7 @@ For a more comprehensive analysis check out the [blog post](https://fherma.io/co
 
 ## Overview
 
-This component provides a solution for logistic aka sigmoid function, which is the basis for logistic regression-based machine learning, also commonly employed as a non-linear activation function in neural networks.
+This component provides a solution for approximating logistic aka sigmoid function, which is the basis for logistic regression-based machine learning, also commonly employed as a non-linear activation function in neural networks.
 The proposed algorithm provides an accuracy of $99.9988\%$ with a multiplicative depth of 7 and an accuracy of $96.6\%$ with a multiplicative depth of 4.
 
 ## Implementation
