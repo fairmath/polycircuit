@@ -1,5 +1,7 @@
 # Matrix Multiplication component
+☀️ *This component was developed during FHERMA Winter challenges competition in Nov 23 - Feb 24.*
 
+---
 The winning solution for the FHERMA [Matrix Multiplication challenge](https://fherma.io/challenges/652bf669485c878710fd020b).
 
 For a more comprehensive analysis check out the [blog post](https://fherma.io/content/65de4152bfa5f4ea4471701e) by the challenge's winner, [Aikata](https://www.iaik.tugraz.at/person/aikata-aikata/), a Ph.D. student at TU Graz.

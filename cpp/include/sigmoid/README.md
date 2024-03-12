@@ -1,5 +1,7 @@
 # Logistic Function aka sigmoid component
+☀️ *This component was developed during FHERMA Winter challenges competition in Nov 23 - Feb 24.*
 
+---
 The winning solution for the FHERMA [Logistic Function challenge](https://fherma.io/challenges/652bf648485c878710fd0208).
 
 For a more comprehensive analysis check out the [blog post](https://fherma.io/content/65de3d6abfa5f4ea4471701a) by the challenge's winner, [Aikata](https://www.iaik.tugraz.at/person/aikata-aikata/), a Ph.D. student at TU Graz.

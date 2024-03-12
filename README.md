@@ -1,6 +1,6 @@
 # FHE components library
 
-This repository contains dynamicaly extended application layer FHE Components library for developers.
+This repository is an initial phase of building application layer FHE Components library for developers.
 This library is home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform and will be constantly extended by adding new FHE components.  
 
 Initial version of the library contains results of the first challenges: 
