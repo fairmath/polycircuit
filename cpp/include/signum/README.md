@@ -1,5 +1,7 @@
 # Sign Evaluation component
+☀️ *This component was developed during FHERMA Winter challenges competition in Nov 23 - Feb 24.*
 
+---
 The winning solution for the FHERMA [Sign Evaluation challenge](https://fherma.io/challenges/652bf668485c878710fd020a).
 
 For a more comprehensive analysis check out the [blog post](https://fherma.io/content/65de3f45bfa5f4ea4471701c) by the challenge's winner, [Aikata](https://www.iaik.tugraz.at/person/aikata-aikata/), a Ph.D. student at TU Graz.
