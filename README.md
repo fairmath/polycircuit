@@ -1,7 +1,6 @@
 # FHE components library
 
-This repository is an initial phase of building application layer FHE Components library for developers.
-This library is home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform and will be constantly extended by adding new FHE components.  
+This repository is an initial phase of building application layer FHE Components library for developers and is home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform. The library will be constantly extended by adding new FHE components.  
 
 Initial version of the library contains results of the first challenges: 
 - [Matrix Multiplication](https://fherma.io/challenges/652bf669485c878710fd020b/overview)
