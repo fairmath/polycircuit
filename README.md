@@ -1,8 +1,9 @@
 # FHE components library
 
-This repository is an initial phase of building application layer FHE Components library for developers and is home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform. The library will be constantly extended by adding new FHE components.  
+This repository is an initial phase of building an application layer FHE Components library for developers and serves as the home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform.
+The library will be constantly extended by adding new FHE components.
 
-Initial version of the library contains results of the first challenges: 
+The initial version of the library contains the results of the first challenges: 
 - [Matrix Multiplication](https://fherma.io/challenges/652bf669485c878710fd020b/overview)
 - [Logistic Regression Function](https://fherma.io/challenges/652bf648485c878710fd0208/overview)
 - [Sign Evaluation](https://fherma.io/challenges/652bf668485c878710fd020a/overview)
@@ -23,14 +24,15 @@ The library is designed with flexibility in mind, ensuring it's backend-agnostic
 </picture>
 
 # Contributing to the Library
-There are two ways to contribute to Polycircuit. You can:
-- Create PR with new component or improvements for existing one;
+There are two ways to contribute to Polycircuit:
+- Create PR with a new component or improvements for an existing one;
 - Participate in the challenges on the [FHERMA platform](https://fherma.io/challenges).
 
 # Stay Connected
 
 Join our vibrant community to stay updated on the latest developments, participate in discussions, and connect with fellow FHE enthusiasts:
 
-* Discord: Join our [Discord channel](https://discord.com/invite/NfhXwyr9M5) for real-time chat, Q&A, and community events.
-* Twitter: Follow us on [Twitter](https://twitter.com/FairMath) for the latest news, updates, and interesting tidbits from the world of Fully Homomorphic Encryption.
-* Visit our [Fairmath blog](https://fairmath.xyz/blog) and [FHERMA challenges wrap-ups](https://fherma.io/content) for in-depth articles, feature announcements, tutorials, and insights into the future of privacy-preserving technologies.
+* Discord: Join our [Discord server](https://discord.com/invite/NfhXwyr9M5) for real-time chat, Q&A, and community events.
+* Twitter: Follow us on [X](https://twitter.com/FairMath) for the latest news, updates, and interesting tidbits from the world of Fully Homomorphic Encryption.
+* LinkedIn: Join our [LinkedIn group]() to stay in touch with the team and the updates.
+* Visit our [Fair Math blog](https://fairmath.xyz/blog) and [FHERMA challenges wrap-ups](https://fherma.io/content) for in-depth articles, feature announcements, tutorials, and insights into the future of privacy-preserving technologies.
