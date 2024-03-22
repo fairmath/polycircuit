@@ -1,0 +1,13 @@
+{
+    "indexes_for_rotation_key": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "ring_dimension": 32768,
+    "mult_depth": 10,
+    "batch_size": 16384,
+    "scale_mod_size": 48
+  }
