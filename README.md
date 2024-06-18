@@ -23,6 +23,60 @@ The library is designed with flexibility in mind, ensuring it's backend-agnostic
   <img>
 </picture>
 
+# Installation
+To use library components, you'll need to install several dependencies and Polycircuit library itself.
+
+## Prerequisites
+Ensure you have the following dependencies installed:
+
+* `CMake >= 3.5.1`
+* `G++ >= 11.4`
+* `Git >= 2.34.1`
+
+## Library installation
+To install the header-only Polycircuit library, follow these steps:
+
+1. Clone the repository
+```bash
+git clone https://github.com/fairmath/polycircuit.git
+cd polycircuit
+```
+
+2. Configure CMake and install Polycircuit library in /usr/local/include
+```bash
+cmake .
+cmake --build . --target install
+```
+You can also set a different installation directory:
+```bash
+cmake . -DCMAKE_INSTALL_PREFIX:PATH=/path/to/include
+cmake --build . --target install
+```
+
+# Build and run the examples
+The examples demonstrate the basic use of a particular component.
+To build and run examples, you'll need to install several dependencies.
+
+## Prerequisites
+Ensure you have the following dependencies installed:
+
+* `CMake >= 3.5.1`
+* `G++ >= 11.4`
+* `Git >= 2.34.1`
+* `Boost >= 1.74.0`
+* `OpenFHE >= 1.1.4`
+
+## Building and running the matrix_mult_usage example:
+1. Build:
+```bash
+cd examples/matrix_mult_usage
+cmake -B ./build && make -C ./build -j$(nproc)
+```
+2. Run (for more info about accepting parameters, see help):
+```bash
+./build/matrix_mult --help
+```
+
 # Contributing to the Library
 There are two ways to contribute to Polycircuit:
 - Create PR with a new component or improvements for an existing one;
