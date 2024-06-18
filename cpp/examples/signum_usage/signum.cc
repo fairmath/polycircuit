@@ -43,19 +43,19 @@ int main(int argc, char *argv[])
         lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
         lbcrypto::Ciphertext<lbcrypto::DCRTPoly> inputC;
         if (!lbcrypto::Serial::DeserializeFromFile(
-            boost::any_cast<std::string>(vm["cryptocontext_location"].value()), cc, lbcrypto::SerType::BINARY))
+            boost::any_cast<const std::string&>(vm["cryptocontext_location"].value()), cc, lbcrypto::SerType::BINARY))
         {
             std::cerr << "Could not deserialize cryptocontext." << std::endl;
             std::exit(EXIT_FAILURE);
         }
         if (!lbcrypto::Serial::DeserializeFromFile(
-            boost::any_cast<std::string>(vm["input_ciphertext_location"].value()), inputC, lbcrypto::SerType::BINARY))
+            boost::any_cast<const std::string&>(vm["input_ciphertext_location"].value()), inputC, lbcrypto::SerType::BINARY))
         {
             std::cerr << "Could not deserialize ciphertext." << std::endl;
             std::exit(EXIT_FAILURE);
         }
         if (!lbcrypto::Serial::SerializeToFile(
-                boost::any_cast<std::string>(vm["output_ciphertext_location"].value()),
+                boost::any_cast<const std::string&>(vm["output_ciphertext_location"].value()),
                 std::move(std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
                     polycircuit::Signum<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
                 lbcrypto::SerType::BINARY))
