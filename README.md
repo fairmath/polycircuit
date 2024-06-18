@@ -1,27 +1,7 @@
-# FHE components library
+# FHE Components library
 
 This repository is an initial phase of building an application layer FHE Components library for developers and serves as the home to the award-winning solutions from the [FHERMA](https://fherma.io/) challenges platform.
 The library will be constantly extended by adding new FHE components.
-
-The initial version of the library contains the results of the first challenges: 
-- [Matrix Multiplication](https://fherma.io/challenges/652bf669485c878710fd020b/overview)
-- [Logistic Regression Function](https://fherma.io/challenges/652bf648485c878710fd0208/overview)
-- [Sign Evaluation](https://fherma.io/challenges/652bf668485c878710fd020a/overview)
-
- Check out the [FHERMA competition platform](https://fherma.io/) for innovative FHE solutions and challenges.
-
-# FHE backend
-Currently, Polycircuit supports two FHE backends:
-* OpenFHE
-* Lattigo
-
-The library is designed with flexibility in mind, ensuring it's backend-agnostic. 
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/fairmath/components/assets/20524659/374ed5f8-c5c9-4db8-bb38-bb1d8b76dad7">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/fairmath/components/assets/20524659/e72ba649-ecca-46c4-b621-f4b96db1def9">
-  <img>
-</picture>
 
 # Installation
 To use library components, you'll need to install several dependencies and Polycircuit library itself.
