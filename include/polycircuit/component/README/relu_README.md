@@ -1,73 +1,51 @@
-# ReLU component
 
-*This is a stub repository for the future ReLU component from the FHERMA ReLU challenge https://fherma.io/challenges/6542c282100761da3b545c3e which is live on March-Jun 2024.*
-*Link to the template repository: https://github.com/Fherma-challenges/relu*
+# ReLU Component
+
+☀️ *This component was developed during the FHERMA ReLU Challenge competition in Mar - Jun 2024.*
 
 ---
 
+The winning solution for the FHERMA [ReLU Challenge](https://fherma.io/challenges/6542c282100761da3b545c3e).
+
+For a more comprehensive analysis, check out the [blog post](LINK!) by the challenge winners, [Janis Adamek](https://rcs.mb.tu-dortmund.de/about-us/team/researchers/janis-adamek/), [Dieter Teichrib](https://rcs.mb.tu-dortmund.de/about-us/team/researchers/dieter-teichrib/), [Philipp Binfet](https://rcs.mb.tu-dortmund.de/about-us/team/researchers/philipp-binfet/), and [Moritz Schulze Darup](https://rcs.mb.tu-dortmund.de/about-us/team/heads/moritz-schulze-darup/) from Control and Cyberphysical Systems Group, TU Dortmund, Germany.
+
 ## Overview
 
-The Rectified Linear Unit (ReLU) function is a fundamental activation function used extensively in neural networks, particularly in deep learning models.
-It is a simple yet powerful non-linear function that introduces non-linearity into the network, allowing it to learn complex patterns and representations in the data.
+This component provides a solution for approximating the Rectified Linear Unit (ReLU) function, a critical non-linear activation function used in neural networks, particularly within deep learning models. The ReLU function introduces non-linearity, allowing neural networks to learn complex patterns and representations from the data.
 
-The ReLU function is defined mathematically as:
+The ReLU function is mathematically defined as:
 
-ReLU(x) = \max(0, x)
+$$
+\text{ReLU}(x) = \max(0, x)
+$$
 
-The objective of the challenge is to create an algorithm capable of computing the ReLU function on data encrypted with CKKS.
-
-## Challenge Info:
-
-1. **Challenge type:** This challenge is a Black Box.
-Participants are only required to submit the resultant ciphertext.
-Code or implementation details are not required during the challenge.
-However, the project code will be asked from the winner of the competition.
-2. **Encryption Scheme**: CKKS.
-3. **Supported libraries**: [OpenFHE](https://github.com/openfheorg/openfhe-development), [Lattigo](https://github.com/tuneinsight/lattigo).
-4. **Input Data**: 
-    * Encrypted vector **X**
-    * Cryptocontext
-    * Public key
-    * Multiplication (Relinearization) key
-5. **Output Data**: The outcome should be an encrypted vector `ReLU(x)`.
-
-*If additional rotation keys are needed, please open an issue on [GitHub](https://github.com/Fherma-challenges/relu) and we will provide them.*
-
-## How to Participate
-
-This is a **Black Box** challenge.
-We've prepared a guide on how to participate in these types of challenges, please see our [User Guide](https://fherma.io/how_it_works).
-
-## Encoding Technique
-
-By default, we pack the input vector **X** in ciphertext as follows:
-| x<sub>0</sub> | x<sub>1</sub> | x<sub>2</sub> | x<sub>3</sub> |...
-|---|---|---|---|---
-
-The resulting **ReLU(X)** vector should be packed in the same manner:
-
-| ReLU(x<sub>0</sub>) | ReLU(x<sub>1</sub>) | ReLU(x<sub>2</sub>) | ReLU(x<sub>3</sub>) | ...
-|---|---|---|---|---
-
-*If you need the data to be packaged in a different format, please open an issue on [GitHub](https://github.com/Fherma-challenges/relu).*
-
-## Implementation
-
-Your implementation could be here!
-
-## Test Environment 
-
-The following libraries/packages were used for generating test cases: 
- - **OpenFHE**: v1.1.2
- - **Lattigo**: v5.0.2
-
-Participants can use any third-party software and libraries to solve the challenge.
-The only requirement is that the ciphertext uploaded to the platform should be compatible with the OpenFHE library v1.1 or Lattigo v5.0.2.
+The challenge required the development of an algorithm capable of computing the ReLU function on data encrypted using the CKKS scheme. The encrypted implementation leverages polynomial approximations due to the fixed multiplicative depth constraint.
 
 ## Example
 
-Suppose we have a vector `[-0.45, 0, 0.23]`.
-After applying the **ReLU** function to each element, we get the vector `[0, 0, 0.23]`.
+For a vector `[-0.45, 0, 0.23]`, applying the **ReLU** function should result in `[0, 0, 0.23]`.
+
+## Implementation
+
+For a multiplicative depth of 4, achieving a high accuracy is quite challenging. A standard Chebyshev approximation of order $n=2^d-1=15$ yielded an accuracy of approximately 63%. However, by formulating the problem as a mixed-integer linear program (MILP) and utilizing integer leading coefficients, the accuracy was improved to 88.4%.
+
+The final polynomial approximation, illustrated in Figure 1, is:
+
+$$
+\begin{align*}
+p(x)&=0.0324+0.5x+2.1348x^2-13.9209x^4+70.0983x^6-213.0967x^8+385.9436x^{10}\\
+&-407.0473x^{12}+230.3549x^{14}-54x^{16}
+\end{align*}
+$$
+
+|![Figure 1](https://github.com/user-attachments/assets/37f20b77-4a08-4b6a-a023-18ea405221ba)|
+|:-------------------------:|
+|*Figure 1: (left) Approximation of the ReLU function with a polynomial of order 16. (right) Polynomial approximation with error threshold.*|
+
+## Test Environment 
+
+The following versions of libraries/packages were used for running tests:
+ - **OpenFHE**: v1.1.2
 
 ## Useful Links
 
@@ -75,10 +53,8 @@ After applying the **ReLU** function to each element, we get the vector `[0, 0, 
 * [OpenFHE Python](https://github.com/openfheorg/openfhe-python)
 * [Lattigo](https://github.com/tuneinsight/lattigo)
 
-## Help
+## References
 
-If you have any questions, you can:
- * Contact us by email: support@fherma.io
- * Ask a question in our [Discord](https://discord.gg/NfhXwyr9M5).
- * Open an issue in the [GitHub Repository](https://github.com/Fherma-challenges/relu).
- * Use [OpenFHE Discourse](https://openfhe.discourse.group).
+[1] Eunsang Lee, Joon-Woo Lee, Jong-Seon No, and Young-Sik Kim. Minimax approximation of sign function by composite polynomial for homomorphic comparison. IEEE Transactions on Dependable and Secure Computing, 19(6):3711–3727, 2022.
+
+[2] MOSEK ApS. The MOSEK optimization toolbox for MATLAB manual. Version 10.0, 2024. [https://docs.mosek.com/10.0/toolbox/index.html](https://docs.mosek.com/10.0/toolbox/index.html).
