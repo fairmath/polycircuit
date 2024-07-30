@@ -27,12 +27,12 @@ int main(int argc, char *argv[]) try
     if (!vm.count("size"))
     {
         std::cerr << "Matrix size is not specified." << std::endl;
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
     if (!vm.count("cryptocontext_location"))
     {
         std::cerr << "Cryptocontext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
     if (!vm.count("a_input_ciphertext_location"))
     {

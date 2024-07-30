@@ -370,4 +370,3 @@ private:
 };
 
 } // polycircuit
-
