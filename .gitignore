@@ -1,4 +1,6 @@
-*.txt
+CMakeCache.txt
+CMakeLists.txt
+install_manifest.txt
 *.cmake
 Makefile
 CMakeFiles
