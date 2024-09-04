@@ -8,23 +8,23 @@ namespace polycircuit
 {
 
 template <typename ElementType>
-class Parity final : public IComponent
+class ParityChallenge final : public IComponent
 {
 public:
-    explicit Parity(lbcrypto::CryptoContext<ElementType>&& cc,
-                    lbcrypto::Ciphertext<ElementType>&& inputC)
+    explicit ParityChallenge(lbcrypto::CryptoContext<ElementType>&& cc,
+                             lbcrypto::Ciphertext<ElementType>&& inputC)
         : m_cc(std::move(cc))
         , m_inputC(std::move(inputC))
     { }
-    explicit Parity(const lbcrypto::CryptoContext<ElementType>& cc,
-                    const lbcrypto::Ciphertext<ElementType>& inputC)
+    explicit ParityChallenge(const lbcrypto::CryptoContext<ElementType>& cc,
+                             const lbcrypto::Ciphertext<ElementType>& inputC)
         : m_cc(cc)
         , m_inputC(inputC)
     { }
-    Parity(const Parity&) = default;
-    Parity(Parity&&) = default;
-    Parity& operator=(const Parity&) = default;
-    Parity& operator=(Parity&&) = default;
+    ParityChallenge(const ParityChallenge&) = default;
+    ParityChallenge(ParityChallenge&&) = default;
+    ParityChallenge& operator=(const ParityChallenge&) = default;
+    ParityChallenge& operator=(ParityChallenge&&) = default;
 
     Ciphertext evaluate() override
     {

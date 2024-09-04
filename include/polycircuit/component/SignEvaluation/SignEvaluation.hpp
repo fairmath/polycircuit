@@ -8,27 +8,27 @@ namespace polycircuit
 {
 
 template <typename ElementType>
-class Signum final : public IComponent
+class SignEvaluation final : public IComponent
 {
 public:
-    explicit Signum(lbcrypto::CryptoContext<ElementType>&& cc,
-                    lbcrypto::Ciphertext<ElementType>&& inputC)
+    explicit SignEvaluation(lbcrypto::CryptoContext<ElementType>&& cc,
+                            lbcrypto::Ciphertext<ElementType>&& inputC)
         : m_cc(std::move(cc))
         , m_inputC(std::move(inputC))
     { }
-    explicit Signum(const lbcrypto::CryptoContext<ElementType>& cc,
-                    const lbcrypto::Ciphertext<ElementType>& inputC)
+    explicit SignEvaluation(const lbcrypto::CryptoContext<ElementType>& cc,
+                            const lbcrypto::Ciphertext<ElementType>& inputC)
         : m_cc(cc)
         , m_inputC(inputC)
     { }
-    Signum(const Signum&) = default;
-    Signum(Signum&&) = default;
-    Signum& operator=(const Signum&) = default;
-    Signum& operator=(Signum&&) = default;
+    SignEvaluation(const SignEvaluation&) = default;
+    SignEvaluation(SignEvaluation&&) = default;
+    SignEvaluation& operator=(const SignEvaluation&) = default;
+    SignEvaluation& operator=(SignEvaluation&&) = default;
 
     Ciphertext evaluate() override
     {
-        static std::vector<double> coeff_val({
+        static std::vector<double> coeffVal({
             0.0, 1.273238551875655,       0.0, -0.42441020299615195,    0.0, 0.25464294463091813,
             0.0, -0.18188441346502052,    0.0, 0.1414621246790797,      0.0, -0.11573812786240627,
             0.0, 0.09792859592938771,     0.0, -0.08486774290277588,    0.0, 0.07487956443817181,
@@ -201,7 +201,7 @@ public:
 
         m_cc->Enable(lbcrypto::PKESchemeFeature::ADVANCEDSHE);
 
-        lbcrypto::Ciphertext<ElementType> outputC = m_cc->EvalChebyshevSeries(m_inputC, coeff_val, -1, 1);
+        lbcrypto::Ciphertext<ElementType> outputC = m_cc->EvalChebyshevSeries(m_inputC, coeffVal, -1, 1);
 
         std::vector<lbcrypto::Ciphertext<ElementType>> t(1024);
         int l = 512;
@@ -225,14 +225,14 @@ public:
 
         //----------------------------  T1009,T1011,T1013,T1015 -----------------------------
 
-        static std::vector<double> coeff_val2({
+        static std::vector<double> coeffVal2({
             5.3627954846304366e-05, -4.766676484102891e-05, 4.170646728565051e-05, -3.574695081520454e-05});
 
         int len = 4;
 
         for (int i = 0; i < len; i++)
         {
-            double coeff = coeff_val2[i];
+            double coeff = coeffVal2[i];
             auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 64), t[16]);
             auto temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 32);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -256,12 +256,12 @@ public:
 
         //----------------------------  T1017,T1019 -----------------------------
 
-        static std::vector<double> coeff_val3({2.9788103390049553e-05, -2.3829813764789798e-05});
+        static std::vector<double> coeffVal3({2.9788103390049553e-05, -2.3829813764789798e-05});
         len = 2;
 
         for (int i = 0; i < len; i++)
         {
-            double coeff = coeff_val3[i];
+            double coeff = coeffVal3[i];
             auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 128), t[8]);
             auto temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 64);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -289,12 +289,12 @@ public:
 
         //----------------------------  T1021 -----------------------------
 
-        static std::vector<double> coeff_val4({1.7871969994745013e-05});
+        static std::vector<double> coeffVal4({1.7871969994745013e-05});
         len = 1;
 
         for (int i = 0; i < len; i++)
         {
-            double coeff = coeff_val4[i];
+            double coeff = coeffVal4[i];
             auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 256), t[4]);
             auto temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 128);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -325,12 +325,12 @@ public:
 
         //----------------------------  T1023 -----------------------------
 
-        static std::vector<double> coeff_val5({-1.1914460923282231e-05});
+        static std::vector<double> coeffVal5({-1.1914460923282231e-05});
         len = 1;
 
         for (int i = 0; i < len; i++)
         {
-            double coeff = coeff_val5[i];
+            double coeff = coeffVal5[i];
             auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 512), t[2]);
             auto temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 256);
             temp1 = m_cc->EvalSub(temp1, temp2);

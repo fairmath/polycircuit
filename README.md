@@ -46,15 +46,15 @@ Ensure you have the following dependencies installed:
 * `Boost >= 1.74.0`
 * `OpenFHE >= 1.1.4`
 
-## Building and running the matrix_mult_usage example:
+## Building and running the MatrixMultiplicationUsage example:
 1. Build:
 ```bash
-cd examples/matrix_mult_usage
+cd examples/MatrixMultiplicationUsage
 cmake -B ./build && make -C ./build -j$(nproc)
 ```
 2. Run (for more info about accepting parameters, see help):
 ```bash
-./build/matrix_mult --help
+./build/MatrixMultiplicationUsage --help
 ```
 
 # Contributing to the Library
