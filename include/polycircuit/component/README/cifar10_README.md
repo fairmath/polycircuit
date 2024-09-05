@@ -4,7 +4,7 @@
 
 This README describes the winning solution for the [FHERMA](https://fherma.io) [CIFAR-10 classification challenge](https://fherma.io/challenges/652bf663485c878710fd0209).
 
-For a more comprehensive analysis of the solutuion, check out the blog posts by the challenge winners: **hita** (Hieu Nguyen from University of Technology Sydney) and the team of the team of **Valentina Kononova**, **osmenojka** (Dmitry Tronin) and **Dmitrii Lekomtsev**.
+For a more comprehensive analysis of the solution, check out the blog posts by the challenge winners: **hita** (Hieu Nguyen from the University of Technology Sydney) and the team of **Valentina Kononova**, **osmenojka** (Dmitry Tronin) and **Dmitrii Lekomtsev**.
 
 ## Image classification on encrypted dataset via CKKS scheme
 
@@ -14,7 +14,7 @@ This dataset serves as a standard benchmark for machine learning algorithms in c
 The goal of the challenge was to develop and implement a machine-learning model capable of efficiently classifying CIFAR-10 images encrypted with the **CKKS homomorphic encryption scheme** without decrypting them, showcasing the intersection of cryptography and machine learning, particularly in privacy-preserving computations.
 
 ## Challenge requirements
-### Input and endcoding
+### Input and encoding technique
 
 The following class indexing was utilized for the CIFAR-10 dataset:
 
@@ -33,7 +33,7 @@ The following class indexing was utilized for the CIFAR-10 dataset:
 
 Each image for the input is encoded as a real vector with a dimension of 3072=3x1024.
 The initial 1024 slots denote the red channel, the subsequent ones denote green, and the final segment denotes blue.
-Each slot stores value in the range of [0, 255].
+Each slot stores a value in the range of [0, 255].
 
 ### Output
 
@@ -101,7 +101,7 @@ The component supports the following CLI options:
 
 ### Parameters
 
-Parameters that are used to generate crypto context, keys and ciphertext are specified in the config file **config.json** located in the project root.
+Parameters that are used to generate crypto context, keys, and ciphertext are specified in the config file **config.json** located in the project root.
 See the Parameters guide on FHERMA for more info on what can be configured
 []().
 
