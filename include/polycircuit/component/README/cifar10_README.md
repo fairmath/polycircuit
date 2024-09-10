@@ -4,7 +4,7 @@
 
 This README describes the winning solution for the [FHERMA](https://fherma.io) [CIFAR-10 classification challenge](https://fherma.io/challenges/652bf663485c878710fd0209).
 
-For a more comprehensive analysis of the solution, check out the blog posts by the challenge winners: **hita** (Hieu Nguyen from the University of Technology Sydney) and the team of **Valentina Kononova**, **osmenojka** (Dmitry Tronin) and **Dmitrii Lekomtsev**.
+For a more comprehensive analysis of the solution, check out the blog posts by the challenge winners: **hita** (Hieu Nguyen from the University of Technology Sydney) and [by the team of **Valentina Kononova**, **osmenojka** (Dmitry Tronin) and **Dmitrii Lekomtsev**](https://fherma.io/content/66d86ed4e4477f9e186fa08f).
 
 ## Image classification on encrypted dataset via CKKS scheme
 
@@ -102,8 +102,7 @@ The component supports the following CLI options:
 ### Parameters
 
 Parameters that are used to generate crypto context, keys, and ciphertext are specified in the config file **config.json** located in the project root.
-See the Parameters guide on FHERMA for more info on what can be configured
-[]().
+See the **Parameters** section in our [FHERMA participant guide](https://fherma.io/how_it_works) for more info on what can be configured.
 
 ## Useful Links
 
@@ -113,11 +112,3 @@ See the Parameters guide on FHERMA for more info on what can be configured
 * [OpenFHE Rust](https://github.com/fairmath/openfhe-rs), its tutorial and documentation
 * [OpenFHE AAAI 2024 Tutorial](https://openfheorg.github.io/aaai-2024-lab-materials/)—Fully Homomorphic Encryption for Privacy-Preserving Machine Learning Using the OpenFHE Library
 * [A vast collection of resources](https://fhe.org/resources) collected by [FHE.org](http://FHE.org), including tutorials and walk-throughs, use-cases and demos.
-
-## Help
-
-If you have any questions, you can:
-* Contact us by email: support@fherma.io
-* Join our [Discord](https://discord.gg/NfhXwyr9M5) server, and ask your questions in the [#fherma channel](https://discord.com/channels/1163764915803279360/1167875954392187030).
-* Open an issue in [this GitHub Repository](https://github.com/fairmath/polycircuit).
-* Use [OpenFHE Discourse](https://openfhe.discourse.group) for OpenFHE related issues.
