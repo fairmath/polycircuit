@@ -1,0 +1,76 @@
+# Lookup table component
+
+☀️ *This component was developed during the FHERMA Lookup challenge in Apr - Aug 2024.*
+
+---
+This README describes the winning solution for the [FHERMA](https://fherma.io) [Lookup table challenge](https://fherma.io/challenges/665efcf8bad7bdd77d182111).
+
+For a more comprehensive analysis, check out the [blog post](https://fherma.io/content/66d9c84af6ea18c58bf5e97a) by the challenge winner, [Jules Dumezy](https://www.linkedin.com/in/jules-dumezy/), MSc Student at the Ecole Centrale de Lille.
+
+## Overview
+
+The objective of the challenge is to get an `i` element of an array encrypted under BGV/BFV, with both the array and element's position being encrypted.
+
+## Challenge requirements
+### Parameters of the input
+
+1. **Vector and its packing**: the values of the vector will be written in slots $0,\ldots, (n-1)$ of the ciphertext, where $n$ is the size of the vector. Slot $i$ will contain the value $x_{i+1}$, size of the vector is $n$.
+2. **Input range**: for each element $x_i$ is an integer number in $[0,255]$
+
+You will find an example input below in the **Example** section.
+
+## Requirements of the output
+
+1. **Packing**: the result should contain one value - the maximum value among all the values from the encrypted vector $A$.
+2. **Accuracy**: the values for any $i$ must not incur an error of more than $0.01$.
+
+You will find an example output below in the **Example** section.
+
+### Example
+
+The executable will be run as follows:
+```
+./app --cc cc.bin --key_public pub.bin --key_mult mult.bin --array array.bin --idx index.bin --output out.bin
+```
+An example for the message encrypted in `array.bin`: `Input = [1, 2, 3, 4, 5]`. An example for the message encrypted in `index.bin`: `Index = [2]`.
+
+An example output for this input: `Output = [3]`
+
+## Running and testing
+### Test environment
+
+The solution was tested inside a Docker container using the following libraries/packages:
+
+- **OpenFHE**: v1.1.4
+- **OpenFHE-Python**: v0.8.6
+
+### Hardware
+
+**CPU**: 12 core
+**RAM**: 54 GB
+
+### Command-line interface
+
+The component supports the following CLI options:
+
+- **--array** [path]: specifies the path to the file containing the encrypted vector/array.
+- **--idx** [path]: specifies the path to the file containing the vector/array with the first element specifying the encrypted index.
+- **--output** [path]: specifies the path to the file where the result should be written.
+- **--cc** [path]: indicates the path to the crypto context file serialized in **BINARY** form.
+- **--key_public** [path]: the path to the Public Key file.
+- **--key_mult** [path]: the path to the Evaluation (Multiplication) Key file.
+- **--key_rot** [path]: the path to the Rotation Key file.
+
+### Parameters
+
+Parameters that are used to generate crypto context, keys, and ciphertext are specified in the config file **config.json** located in the project root.
+See the **Parameters** section in our [FHERMA participant guide](https://fherma.io/how_it_works) for more info on what can be configured.
+
+## Useful links
+
+* [FHERMA participation guide](https://fherma.io/how_it_works)—more on FHERMA challenges
+* [OpenFHE](https://github.com/openfheorg/openfhe-development) repository, README, and installation guide
+* [OpenFHE Python](https://github.com/openfheorg/openfhe-python)
+* [OpenFHE Rust](https://github.com/fairmath/openfhe-rs), its tutorial and documentation
+* [OpenFHE AAAI 2024 Tutorial](https://openfheorg.github.io/aaai-2024-lab-materials/)—Fully Homomorphic Encryption for Privacy-Preserving Machine Learning Using the OpenFHE Library
+* [A vast collection of resources](https://fhe.org/resources) collected by [FHE.org](http://FHE.org), including tutorials and walk-throughs, use-cases and demos.
