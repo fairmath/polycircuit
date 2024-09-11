@@ -8,31 +8,31 @@ namespace polycircuit
 {
 
 template <typename ElementType>
-class MatrixMult final : public IComponent
+class MatrixMultiplication final : public IComponent
 {
 public:
-    explicit MatrixMult(const int matrixSize,
-                        lbcrypto::CryptoContext<ElementType>&& cc,
-                        lbcrypto::Ciphertext<ElementType>&& matrixAC,
-                        lbcrypto::Ciphertext<ElementType>&& matrixBC)
+    explicit MatrixMultiplication(const int matrixSize,
+                                  lbcrypto::CryptoContext<ElementType>&& cc,
+                                  lbcrypto::Ciphertext<ElementType>&& matrixAC,
+                                  lbcrypto::Ciphertext<ElementType>&& matrixBC)
         : m_matrixSize(matrixSize)
         , m_cc(std::move(cc))
         , m_MatrixAC(std::move(matrixAC))
         , m_MatrixBC(std::move(matrixBC))
     { }
-    explicit MatrixMult(const int matrixSize,
-                        const lbcrypto::CryptoContext<ElementType>& cc,
-                        const lbcrypto::Ciphertext<ElementType>& matrixAC,
-                        const lbcrypto::Ciphertext<ElementType>& matrixBC)
+    explicit MatrixMultiplication(const int matrixSize,
+                                  const lbcrypto::CryptoContext<ElementType>& cc,
+                                  const lbcrypto::Ciphertext<ElementType>& matrixAC,
+                                  const lbcrypto::Ciphertext<ElementType>& matrixBC)
         : m_matrixSize(matrixSize)
         , m_cc(cc)
         , m_MatrixAC(matrixAC)
         , m_MatrixBC(matrixBC)
     { }
-    MatrixMult(const MatrixMult&) = default;
-    MatrixMult(MatrixMult&&) = default;
-    MatrixMult& operator=(const MatrixMult&) = default;
-    MatrixMult& operator=(MatrixMult&&) = default;
+    MatrixMultiplication(const MatrixMultiplication&) = default;
+    MatrixMultiplication(MatrixMultiplication&&) = default;
+    MatrixMultiplication& operator=(const MatrixMultiplication&) = default;
+    MatrixMultiplication& operator=(MatrixMultiplication&&) = default;
 
     Ciphertext evaluate() override
     {

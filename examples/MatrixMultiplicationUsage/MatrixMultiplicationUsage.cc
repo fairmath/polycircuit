@@ -1,4 +1,4 @@
-#include "polycircuit/component/Signum.hpp"
+#include "polycircuit/component/MatrixMultiplication/MatrixMultiplication.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -9,8 +9,10 @@ int main(int argc, char *argv[]) try
     po::options_description desc("Allowed parameters");
     desc.add_options()
     ("help,h", "produce help message")
+    ("size", po::value<int>(), "set square matrix size")
     ("cryptocontext_location", po::value<std::string>(), "set cryptocontext location")
-    ("input_ciphertext_location", po::value<std::string>(), "set input ciphertext location")
+    ("a_input_ciphertext_location", po::value<std::string>(), "set input ciphertext location of \"a\"")
+    ("b_input_ciphertext_location", po::value<std::string>(), "set input ciphertext location of \"b\"")
     ("output_ciphertext_location", po::value<std::string>(), "set output ciphertext location");
 
     po::variables_map vm;
@@ -22,14 +24,24 @@ int main(int argc, char *argv[]) try
         std::cout << desc << '\n';
         return EXIT_SUCCESS;
     }
+    if (!vm.count("size"))
+    {
+        std::cerr << "Matrix size is not specified." << std::endl;
+        return EXIT_FAILURE;
+    }
     if (!vm.count("cryptocontext_location"))
     {
         std::cerr << "Cryptocontext location is not specified." << std::endl;
         return EXIT_FAILURE;
     }
-    if (!vm.count("input_ciphertext_location"))
+    if (!vm.count("a_input_ciphertext_location"))
     {
-        std::cerr << "Input ciphertext location is not specified." << std::endl;
+        std::cerr << "Input ciphertext location of \"a\" matrix is not specified." << std::endl;
+        return EXIT_FAILURE;
+    }
+    if (!vm.count("b_input_ciphertext_location"))
+    {
+        std::cerr << "Input ciphertext location of \"b\" matrix is not specified." << std::endl;
         return EXIT_FAILURE;
     }
     if (!vm.count("output_ciphertext_location"))
@@ -46,9 +58,17 @@ int main(int argc, char *argv[]) try
         return EXIT_FAILURE;
     }
 
-    lbcrypto::Ciphertext<lbcrypto::DCRTPoly> inputC;
+    lbcrypto::Ciphertext<lbcrypto::DCRTPoly> aMatrixInputC;
     if (!lbcrypto::Serial::DeserializeFromFile(
-        boost::any_cast<const std::string&>(vm["input_ciphertext_location"].value()), inputC, lbcrypto::SerType::BINARY))
+        boost::any_cast<const std::string&>(vm["a_input_ciphertext_location"].value()), aMatrixInputC, lbcrypto::SerType::BINARY))
+    {
+        std::cerr << "Could not deserialize ciphertext." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    lbcrypto::Ciphertext<lbcrypto::DCRTPoly> bMatrixInputC;
+    if (!lbcrypto::Serial::DeserializeFromFile(
+        boost::any_cast<const std::string&>(vm["b_input_ciphertext_location"].value()), bMatrixInputC, lbcrypto::SerType::BINARY))
     {
         std::cerr << "Could not deserialize ciphertext." << std::endl;
         return EXIT_FAILURE;
@@ -57,7 +77,11 @@ int main(int argc, char *argv[]) try
     if (!lbcrypto::Serial::SerializeToFile(
         boost::any_cast<const std::string&>(vm["output_ciphertext_location"].value()),
         std::move(std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
-            polycircuit::Signum<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
+            polycircuit::MatrixMultiplication<lbcrypto::DCRTPoly>(
+                boost::any_cast<int>(vm["size"].value()),
+                std::move(cc),
+                std::move(aMatrixInputC),
+                std::move(bMatrixInputC)).evaluate())),
         lbcrypto::SerType::BINARY))
     {
         std::cerr << "Could not serialize ciphertext." << std::endl;

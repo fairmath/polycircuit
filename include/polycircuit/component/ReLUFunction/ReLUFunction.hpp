@@ -8,27 +8,27 @@ namespace polycircuit
 {
 
 template <typename ElementType>
-class Relu final : public IComponent
+class ReLUFunction final : public IComponent
 {
 public:
-    explicit Relu(lbcrypto::CryptoContext<ElementType>&& cc,
+    explicit ReLUFunction(lbcrypto::CryptoContext<ElementType>&& cc,
         lbcrypto::Ciphertext<ElementType>&& inputC,
         lbcrypto::PublicKey<ElementType>&& publicKey)
         : m_cc(std::move(cc))
         , m_inputC(std::move(inputC))
         , m_publicKey(std::move(publicKey))
     { }
-    explicit Relu(const lbcrypto::CryptoContext<ElementType>& cc,
+    explicit ReLUFunction(const lbcrypto::CryptoContext<ElementType>& cc,
         const lbcrypto::Ciphertext<ElementType>& inputC,
         const lbcrypto::PublicKey<ElementType>& publicKey)
         : m_cc(cc)
         , m_inputC(inputC)
         , m_publicKey(publicKey)
     { }
-    Relu(const Relu&) = default;
-    Relu(Relu&&) = default;
-    Relu& operator=(const Relu&) = default;
-    Relu& operator=(Relu&&) = default;
+    ReLUFunction(const ReLUFunction&) = default;
+    ReLUFunction(ReLUFunction&&) = default;
+    ReLUFunction& operator=(const ReLUFunction&) = default;
+    ReLUFunction& operator=(ReLUFunction&&) = default;
 
     Ciphertext evaluate() override
     {

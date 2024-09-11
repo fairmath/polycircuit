@@ -8,28 +8,28 @@ namespace polycircuit
 {
 
 template <typename ElementType>
-class Sigmoid final : public IComponent
+class LogisticFunction final : public IComponent
 {
 public:
-    explicit Sigmoid(lbcrypto::CryptoContext<ElementType>&& cc,
-                     lbcrypto::Ciphertext<ElementType>&& inputC)
+    explicit LogisticFunction(lbcrypto::CryptoContext<ElementType>&& cc,
+                              lbcrypto::Ciphertext<ElementType>&& inputC)
         : m_cc(std::move(cc))
         , m_inputC(std::move(inputC))
     { }
-    explicit Sigmoid(const lbcrypto::CryptoContext<ElementType>& cc,
-                     const lbcrypto::Ciphertext<ElementType>& inputC)
+    explicit LogisticFunction(const lbcrypto::CryptoContext<ElementType>& cc,
+                              const lbcrypto::Ciphertext<ElementType>& inputC)
         : m_cc(cc)
         , m_inputC(inputC)
     { }
-    Sigmoid(const Sigmoid&) = default;
-    Sigmoid(Sigmoid&&) = default;
-    Sigmoid& operator=(const Sigmoid&) = default;
-    Sigmoid& operator=(Sigmoid&&) = default;
+    LogisticFunction(const LogisticFunction&) = default;
+    LogisticFunction(LogisticFunction&&) = default;
+    LogisticFunction& operator=(const LogisticFunction&) = default;
+    LogisticFunction& operator=(LogisticFunction&&) = default;
 
     Ciphertext evaluate() override
     {
         // These are only the top 59 values
-        static std::vector<double> coeff_val({
+        static std::vector<double> coeffVal({
             1,   0.6349347497444793,      0.0, -0.207226910968973,      0.0, 0.11926554318627501,
             0.0, -0.08013715047239724,    0.0, 0.05757992161586102,     0.0, -0.04280910730211544,
             0.0, 0.03243169753850008,     0.0, -0.024837099847818355,   0.0, 0.01914266900321147,
@@ -42,14 +42,14 @@ public:
             0.0, -0.00016102095964053078, 0.0, 0.0001253092833997599});
 
         // These are the remaining values
-        static std::vector<double> coeff_val3({
+        static std::vector<double> coeffVal3({
             -9.751288354472837e-05, 0.0, 7.587595780529826e-05,  0.0, -5.903178548385316e-05,  0.0,
             4.591638974071583e-05,  0.0, -3.570132724330664e-05, 0.0, 2.7741357204113592e-05,  0.0,
             -2.15336836799884e-05,  0.0, 1.668619567482025e-05,  0.0, -1.2892699205061372e-05, 0.0,
             9.91357617352584e-06,   0.0, -7.560648875376369e-06});
 
         m_cc->Enable(lbcrypto::PKESchemeFeature::ADVANCEDSHE);
-        lbcrypto::Ciphertext<ElementType> outputC = m_cc->EvalChebyshevSeries(m_inputC, coeff_val, -25, 25);
+        lbcrypto::Ciphertext<ElementType> outputC = m_cc->EvalChebyshevSeries(m_inputC, coeffVal, -25, 25);
 
         std::vector<lbcrypto::Ciphertext<ElementType>> t1(15);
         t1[0] = m_inputC;                       // 0
@@ -121,7 +121,7 @@ public:
 
         for (int i = 0; i < 1; i++)
         {
-            coeff = coeff_val3[i];
+            coeff = coeffVal3[i];
             temp1 = m_cc->EvalMult(m_cc->EvalMult(t[3 + i], coeff * 8), t[8]);
             temp2 = m_cc->EvalMult(t[5 - i], coeff * 4);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -144,7 +144,7 @@ public:
         // T61
         for (int i = 0; i < 1; i++)
         {
-            coeff = coeff_val3[2 + i]; //-coeff_val3[8+i];
+            coeff = coeffVal3[2 + i]; //-coeffVal3[8+i];
             temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + i], coeff * 16), t[4]);
             temp2 = m_cc->EvalMult(t[3 - i], coeff * 8);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -164,7 +164,7 @@ public:
         // T63
         for (int i = 0; i < 1; i++)
         {
-            coeff = coeff_val3[4 + i] - coeff_val3[6 + i];
+            coeff = coeffVal3[4 + i] - coeffVal3[6 + i];
             temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1], coeff * 32), t[2]);
             temp2 = m_cc->EvalMult(t[1], coeff * 16);
             temp1 = m_cc->EvalSub(temp1, temp2);
@@ -185,7 +185,7 @@ public:
         }
 
         // T65
-        coeff = coeff_val3[6];
+        coeff = coeffVal3[6];
 
         temp1 = m_cc->EvalMult(m_cc->EvalMult(m_inputC, (coeff * 32 * 4) / (std::pow(25, 3))), m_cc->EvalSquare(m_inputC));
         temp2 = m_cc->EvalMult(t[1], coeff * 64);
@@ -212,7 +212,7 @@ public:
         // T3=4x^3-3x
         for (int i = 0; i < 6; i++)
         {
-            coeff = coeff_val3[8 + 2 * i];
+            coeff = coeffVal3[8 + 2 * i];
             prod = m_cc->EvalMult(m_cc->EvalMult(m_inputC, 32 * coeff * 4 * std::pow(0.04, 3)),
                                   m_cc->EvalSquare(m_inputC));
             temp2 = m_cc->EvalSub(prod, m_cc->EvalMult(m_inputC, 3 * 32 * coeff * 0.04)); // 2

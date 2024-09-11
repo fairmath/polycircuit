@@ -1,4 +1,4 @@
-#include "polycircuit/component/Sigmoid.hpp"
+#include "polycircuit/component/LogisticFunction/LogisticFunction.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) try
     if (!lbcrypto::Serial::SerializeToFile(
         boost::any_cast<const std::string&>(vm["output_ciphertext_location"].value()),
         std::move(std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
-            polycircuit::Sigmoid<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
+            polycircuit::LogisticFunction<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
         lbcrypto::SerType::BINARY))
     {
         std::cerr << "Could not serialize ciphertext." << std::endl;
