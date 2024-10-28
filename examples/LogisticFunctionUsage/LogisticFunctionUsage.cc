@@ -1,5 +1,7 @@
 #include "polycircuit/component/LogisticFunction/LogisticFunction.hpp"
 
+#include <openfhe/pke/cryptocontext-ser.h>
+
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -10,6 +12,7 @@ int main(int argc, char *argv[]) try
     desc.add_options()
     ("help,h", "produce help message")
     ("cryptocontext_location", po::value<std::string>(), "set cryptocontext location")
+    ("mult_key_location", po::value<std::string>(), "set mult_key location")
     ("input_ciphertext_location", po::value<std::string>(), "set input ciphertext location")
     ("output_ciphertext_location", po::value<std::string>(), "set output ciphertext location");
 
@@ -24,61 +27,71 @@ int main(int argc, char *argv[]) try
     }
     if (!vm.count("cryptocontext_location"))
     {
-        std::cerr << "Cryptocontext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Cryptocontext location is not specified.");
+    }
+    if (!vm.count("mult_key_location"))
+    {
+        throw std::runtime_error("mult_key location is not specified.");
     }
     if (!vm.count("input_ciphertext_location"))
     {
-        std::cerr << "Input ciphertext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Input ciphertext location is not specified.");
     }
     if (!vm.count("output_ciphertext_location"))
     {
-        std::cerr << "Output ciphertext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Output ciphertext location is not specified.");
     }
 
     lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
     if (!lbcrypto::Serial::DeserializeFromFile(
-        boost::any_cast<const std::string&>(vm["cryptocontext_location"].value()), cc, lbcrypto::SerType::BINARY))
+        vm["cryptocontext_location"].as<const std::string&>(), cc, lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Could not deserialize cryptocontext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to deserialize cryptocontext.");
     }
+
+    std::ifstream ifsMultKey(vm["mult_key_location"].as<const std::string&>(), std::ios::in | std::ios::binary);
+    if (!ifsMultKey.is_open())
+    {
+        throw std::runtime_error("Unable to read mult_key.");
+    }
+    if (!cc->DeserializeEvalMultKey(ifsMultKey, lbcrypto::SerType::BINARY))
+    {
+        ifsMultKey.close();
+        throw std::runtime_error("Unable to deserialize mult_key.");
+    }
+    ifsMultKey.close();
 
     lbcrypto::Ciphertext<lbcrypto::DCRTPoly> inputC;
     if (!lbcrypto::Serial::DeserializeFromFile(
-        boost::any_cast<const std::string&>(vm["input_ciphertext_location"].value()), inputC, lbcrypto::SerType::BINARY))
+        vm["input_ciphertext_location"].as<const std::string&>(), inputC, lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Could not deserialize ciphertext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to deserialize ciphertext.");
     }
 
     if (!lbcrypto::Serial::SerializeToFile(
-        boost::any_cast<const std::string&>(vm["output_ciphertext_location"].value()),
+        vm["output_ciphertext_location"].as<const std::string&>(),
         std::move(std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
             polycircuit::LogisticFunction<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
         lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Could not serialize ciphertext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to serialize ciphertext.");
     }
 
     return EXIT_SUCCESS;
 }
 catch (const po::error& ex)
 {
-    std::cerr << ex.what() << '\n';
+    std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
 catch (const std::exception& ex)
 {
-    std::cerr << ex.what() << '\n';
+    std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
 catch (...)
 {
-    std::cerr << "Unknown exception.\n";
+    std::cerr << "An unknown exception was thrown." << std::endl;
     return EXIT_FAILURE;
 }
 
