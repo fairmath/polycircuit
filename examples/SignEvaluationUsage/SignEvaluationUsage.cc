@@ -1,6 +1,6 @@
 #include "polycircuit/component/SignEvaluation/SignEvaluation.hpp"
 
-#include "openfhe/pke/cryptocontext-ser.h"
+#include <openfhe/pke/cryptocontext-ser.h>
 
 #include <boost/program_options.hpp>
 
@@ -27,43 +27,37 @@ int main(int argc, char *argv[]) try
     }
     if (!vm.count("cryptocontext_location"))
     {
-        std::cerr << "Cryptocontext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Cryptocontext location is not specified.");
     }
     if (!vm.count("mult_key_location"))
     {
-        std::cerr << "mult_key location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("mult_key location is not specified.");
     }
     if (!vm.count("input_ciphertext_location"))
     {
-        std::cerr << "Input ciphertext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Input ciphertext location is not specified.");
     }
     if (!vm.count("output_ciphertext_location"))
     {
-        std::cerr << "Output ciphertext location is not specified." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Output ciphertext location is not specified.");
     }
 
     lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc;
     if (!lbcrypto::Serial::DeserializeFromFile(
         vm["cryptocontext_location"].as<const std::string&>(), cc, lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Unable to deserialize cryptocontext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to deserialize cryptocontext.");
     }
 
     std::ifstream ifsMultKey(vm["mult_key_location"].as<const std::string&>(), std::ios::in | std::ios::binary);
     if (!ifsMultKey.is_open())
     {
-        std::cerr << "Unable to read mult_key." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to read mult_key.");
     }
     if (!cc->DeserializeEvalMultKey(ifsMultKey, lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Unable to deserialize mult_key." << std::endl;
-        return EXIT_FAILURE;
+        ifsMultKey.close();
+        throw std::runtime_error("Unable to deserialize mult_key.");
     }
     ifsMultKey.close();
 
@@ -71,8 +65,7 @@ int main(int argc, char *argv[]) try
     if (!lbcrypto::Serial::DeserializeFromFile(
         vm["input_ciphertext_location"].as<const std::string&>(), inputC, lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Unable to deserialize ciphertext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to deserialize ciphertext.");
     }
 
     if (!lbcrypto::Serial::SerializeToFile(
@@ -81,25 +74,24 @@ int main(int argc, char *argv[]) try
             polycircuit::SignEvaluation<lbcrypto::DCRTPoly>(std::move(cc), std::move(inputC)).evaluate())),
         lbcrypto::SerType::BINARY))
     {
-        std::cerr << "Unable to serialize ciphertext." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Unable to serialize ciphertext.");
     }
 
     return EXIT_SUCCESS;
 }
 catch (const po::error& ex)
 {
-    std::cerr << ex.what() << '\n';
+    std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
 catch (const std::exception& ex)
 {
-    std::cerr << ex.what() << '\n';
+    std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
 catch (...)
 {
-    std::cerr << "Unknown exception.\n";
+    std::cerr << "An unknown exception was thrown." << std::endl;
     return EXIT_FAILURE;
 }
 
