@@ -4,3 +4,5 @@ install_manifest.txt
 Makefile
 CMakeFiles
 build
+.build
+.vscode
