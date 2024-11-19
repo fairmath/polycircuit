@@ -4,8 +4,6 @@
 
 #include "openfhe/pke/cryptocontext.h"
 
-#include <list>
-
 namespace polycircuit
 {
 
