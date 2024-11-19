@@ -30,267 +30,128 @@ public:
 
     Ciphertext evaluate() override
     {
-        std::list<std::vector<double>> C =
+        const std::vector<std::vector<double>> weightsMatrix
         {
             #include "CIFAR10ImageClassification_weights.txt"
         };
 
-        std::vector<lbcrypto::Ciphertext<ElementType>> T(9);
-        std::vector<double> V;
-        V.reserve(4096);
+        m_inputC = m_cc->EvalAdd(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(0)));
+        m_inputC = m_cc->EvalMult(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(1)));
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
-
-        auto input_vec = m_inputC;
-        input_vec = m_cc->EvalAdd(input_vec, m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
-        input_vec = m_cc->EvalMult(input_vec, m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
-
-        T[1] = input_vec->Clone();
-        T[2] = m_cc->EvalMult(T[1], T[1]);
-        T[2] = m_cc->EvalAdd(T[2], T[2]);
-        T[2] = m_cc->EvalSub(T[2], 1);
-        T[3] = m_cc->EvalMult(T[2], T[1]);
-        T[3] = m_cc->EvalAdd(T[3], T[3]);
-        T[3] = m_cc->EvalSub(T[3], T[1]);
-        T[4] = m_cc->EvalMult(T[2], T[2]);
-        T[4] = m_cc->EvalAdd(T[4], T[4]);
-        T[4] = m_cc->EvalSub(T[4], 1);
-        T[5] = m_cc->EvalMult(T[4], T[1]);
-        T[5] = m_cc->EvalAdd(T[5], T[5]);
-        T[5] = m_cc->EvalSub(T[5], T[3]);
-        T[6] = m_cc->EvalMult(T[4], T[2]);
-        T[6] = m_cc->EvalAdd(T[6], T[6]);
-        T[6] = m_cc->EvalSub(T[6], T[2]);
-        T[7] = m_cc->EvalMult(T[4], T[3]);
-        T[7] = m_cc->EvalAdd(T[7], T[7]);
-        T[7] = m_cc->EvalSub(T[7], T[1]);
-        T[8] = m_cc->EvalMult(T[4], T[4]);
-        T[8] = m_cc->EvalAdd(T[8], T[8]);
-        T[8] = m_cc->EvalSub(T[8], 1);
-
-        lbcrypto::Ciphertext<ElementType> tmp = m_cc->EvalMult(T[1], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
-        lbcrypto::Ciphertext<ElementType> enc_out = m_cc->EvalAdd(tmp, m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
-        tmp = m_cc->EvalMult(T[1], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> tmp = m_cc->EvalMult(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(2)));
+        lbcrypto::Ciphertext<ElementType> enc_out = m_cc->EvalAdd(tmp, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(3)));
+        tmp = m_cc->EvalMult(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(4)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[1], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(5)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[1], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(m_inputC, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(6)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[2], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> t0 = m_cc->EvalMult(m_inputC, m_inputC);
+        t0 = m_cc->EvalAdd(t0, t0);
+        t0 = m_cc->EvalSub(t0, 1);
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(7)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[2], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(8)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[2], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(9)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[2], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(10)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[3], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> t1 = m_cc->EvalMult(t0, m_inputC);
+        t1 = m_cc->EvalAdd(t1, t1);
+        t1 = m_cc->EvalSub(t1, m_inputC);
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(11)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[3], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(12)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[3], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(13)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[3], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(14)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[4], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> t2 = m_cc->EvalMult(t0, t0);
+        t2 = m_cc->EvalAdd(t2, t2);
+        t2 = m_cc->EvalSub(t2, 1);
+        tmp = m_cc->EvalMult(t2, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(15)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[4], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t2, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(16)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[4], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t2, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(17)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[4], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t2, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(18)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[5], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> t3 = m_cc->EvalMult(t2, m_inputC);
+        t3 = m_cc->EvalAdd(t3, t3);
+        t3 = m_cc->EvalSub(t3, t1);
+        tmp = m_cc->EvalMult(t3, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(19)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[5], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t3, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(20)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[5], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t3, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(21)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[5], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t3, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(22)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[6], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        lbcrypto::Ciphertext<ElementType> t4 = m_cc->EvalMult(t2, t0);
+        t4 = m_cc->EvalAdd(t4, t4);
+        t4 = m_cc->EvalSub(t4, t0);
+        tmp = m_cc->EvalMult(t4, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(23)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[6], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t4, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(24)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[6], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t4, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(25)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[6], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t4, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(26)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[7], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        t0 = m_cc->EvalMult(t2, t1);
+        t0 = m_cc->EvalAdd(t0, t0);
+        t0 = m_cc->EvalSub(t0, m_inputC);
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(27)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[7], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(28)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[7], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(29)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[7], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t0, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(30)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[8], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
 
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        t1 = m_cc->EvalMult(t2, t2);
+        t1 = m_cc->EvalAdd(t1, t1);
+        t1 = m_cc->EvalSub(t1, 1);
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(31)));
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[8], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-        C.pop_front();
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(32)));
         tmp = m_cc->EvalRotate(tmp, -1);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[8], m_cc->MakeCKKSPackedPlaintext(V));
-        V.clear();
-
-        V.insert(V.cend(), C.front().cbegin(), C.front().cend());
-
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(33)));
         tmp = m_cc->EvalRotate(tmp, -2);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
-        tmp = m_cc->EvalMult(T[8], m_cc->MakeCKKSPackedPlaintext(V));
+        tmp = m_cc->EvalMult(t1, m_cc->MakeCKKSPackedPlaintext(weightsMatrix.at(34)));
         tmp = m_cc->EvalRotate(tmp, -3);
         enc_out = m_cc->EvalAdd(tmp, enc_out);
         tmp = m_cc->EvalRotate(enc_out, 1600);
