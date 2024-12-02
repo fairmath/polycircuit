@@ -1,6 +1,6 @@
 jobs:
   format-check:
-    runs-on: ubuntu-latest
+    runs-on: refactoring
     steps:
       - uses: actions/checkout@v3
       - name: Install Clang
