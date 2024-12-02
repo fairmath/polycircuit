@@ -6,3 +6,5 @@ CMakeFiles
 build
 .build
 .vscode
+.DS_Store
+.idea

@@ -1,0 +1,7 @@
+add_subdirectory(cifar10)
+add_subdirectory(lut)
+add_subdirectory(logreg)
+add_subdirectory(parity)
+add_subdirectory(matrix_mul)
+add_subdirectory(max)
+add_subdirectory(shl)

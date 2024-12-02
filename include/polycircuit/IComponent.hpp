@@ -1,23 +1,15 @@
 #pragma once
 
-#include "openfhe/core/lattice/hal/lat-backend.h"
-#include "openfhe/pke/ciphertext-fwd.h"
-
+#include "openfhe/pke/openfhe.h"
 #include <variant>
 
-namespace polycircuit
-{
+namespace polycircuit {
+using Ciphertext = std::variant<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>, lbcrypto::Ciphertext<lbcrypto::Poly>,
+                                lbcrypto::Ciphertext<lbcrypto::NativePoly>>;
 
-using Ciphertext = std::variant<
-    lbcrypto::Ciphertext<lbcrypto::DCRTPoly>,
-    lbcrypto::Ciphertext<lbcrypto::Poly>,
-    lbcrypto::Ciphertext<lbcrypto::NativePoly>>;
-
-class IComponent
-{
+class IComponent {
 public:
-    virtual ~IComponent() = default;
+    virtual ~IComponent()         = default;
     virtual Ciphertext evaluate() = 0;
 };
-
-} // polycircuit
+}  // namespace polycircuit
