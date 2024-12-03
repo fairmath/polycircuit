@@ -6,54 +6,54 @@
 
 namespace polycircuit {
 
-    class CKKSComponent : public Component {
-        lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> m_parameters;
-        lbcrypto::CryptoContext<lbcrypto::DCRTPoly> m_cc;
-        lbcrypto::KeyPair<lbcrypto::DCRTPoly> m_keys;
-        std::vector<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>> m_inputs;
-        std::vector<int> m_rotateKeyIndexes;
+class CKKSComponent : public Component {
+    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> m_parameters;
+    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> m_cc;
+    lbcrypto::KeyPair<lbcrypto::DCRTPoly> m_keys;
+    std::vector<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>> m_inputs;
+    std::vector<int> m_rotateKeyIndexes;
 
-        int m_batchSize;
-        int m_ringDim;
-        int m_scaleModSize;
-        int m_firstModSize;
-        int m_multDepth;
+    int m_batchSize;
+    int m_ringDim;
+    int m_scaleModSize;
+    int m_firstModSize;
+    int m_multDepth;
 
-    public:
-        CKKSComponent();
+public:
+    CKKSComponent();
 
-        void GenerateCryptoContext();
+    void GenerateCryptoContext();
 
-        void KeyGen();
+    void KeyGen();
 
-        void SetCryptoContext(lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc);
+    void SetCryptoContext(lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc);
 
-        void SetKeys(lbcrypto::KeyPair<lbcrypto::DCRTPoly> keys);
+    void SetKeys(lbcrypto::KeyPair<lbcrypto::DCRTPoly> keys);
 
-        void SetRotateKeyIndexes(std::vector<int> rotateKeyIndexes);
+    void SetRotateKeyIndexes(std::vector<int> rotateKeyIndexes);
 
-        void SetMultDepth(int multDepth);
+    void SetMultDepth(int multDepth);
 
-        void SetRingDimension(int ringDim);
+    void SetRingDimension(int ringDim);
 
-        void SetScaleModSize(int scaleModSize);
+    void SetScaleModSize(int scaleModSize);
 
-        void SetFirstModSize(int firstModSize);
+    void SetFirstModSize(int firstModSize);
 
-        void SetBatchSize(int batchSize);
+    void SetBatchSize(int batchSize);
 
-        void AddCipher(lbcrypto::Ciphertext<lbcrypto::DCRTPoly>);
+    void AddCipher(lbcrypto::Ciphertext<lbcrypto::DCRTPoly>);
 
-        void EncryptAndAddCipher(std::vector<double> input);
+    void EncryptAndAddCipher(std::vector<double> input);
 
-        lbcrypto::CryptoContext<lbcrypto::DCRTPoly> GetCryptoContext() const;
+    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> GetCryptoContext() const;
 
-        lbcrypto::KeyPair<lbcrypto::DCRTPoly> GetKeys() const;
+    lbcrypto::KeyPair<lbcrypto::DCRTPoly> GetKeys() const;
 
-        std::vector<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>> &GetInputs();
+    std::vector<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>& GetInputs();
 
-        lbcrypto::Plaintext Decrypt(int index = 0);
+    lbcrypto::Plaintext Decrypt(int index = 0);
 
-        virtual ~CKKSComponent() = default;
-    };
+    virtual ~CKKSComponent() = default;
+};
 }  // namespace polycircuit

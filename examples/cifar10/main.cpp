@@ -20,15 +20,15 @@ minimim required CKKS params
   "level_budget": [0,0]
 }
 */
-int main(int argc, char *argv[]) try {
+int main(int argc, char* argv[]) try {
     polycircuit::ckks::Cifar10 cifar10Evaluator;
 
     cifar10Evaluator.GenerateCryptoContext();
     cifar10Evaluator.KeyGen();
 
     std::ifstream ifs(
-            "/Users/gg/projects/fairmath/polycircuit_new/examples/"
-            "Cifar10/images/class1.txt");
+        "/Users/gg/projects/fairmath/polycircuit_new/examples/"
+        "Cifar10/images/class1.txt");
     if (!ifs.is_open()) {
         throw std::runtime_error("Unable to read input file.");
     }
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) try {
     return EXIT_SUCCESS;
 }
 
-catch (const std::exception &ex) {
+catch (const std::exception& ex) {
     std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
