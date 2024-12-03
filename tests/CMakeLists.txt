@@ -8,9 +8,9 @@ project(polycircuit-tests)
 include("../cmake/utils.cmake")
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
-if(is_top_level)
+if (is_top_level)
     enable_testing()
-endif()
+endif ()
 
 #----------------------------------------------------------------------------------------------------------------------
 # testing framework
@@ -32,17 +32,17 @@ FetchContent_MakeAvailable(googletest)
 # tests dependencies
 #----------------------------------------------------------------------------------------------------------------------
 
-if(is_top_level)
+if (is_top_level)
     find_package(polycircuit REQUIRED)
-endif()
+endif ()
 
 #----------------------------------------------------------------------------------------------------------------------
 # tests sources
 #----------------------------------------------------------------------------------------------------------------------
 
 set(sources
-#    add_test.cpp
-    cifar10.cpp )
+        #    add_test.cpp
+        cifar10.cpp)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -53,13 +53,13 @@ add_executable(polycircuit-tests)
 target_sources(polycircuit-tests PRIVATE ${sources})
 
 target_link_libraries(polycircuit-tests
-    PRIVATE
+        PRIVATE
         polycircuit::polycircuit
         gtest_main)
 
-if(NOT is_top_level)
+if (NOT is_top_level)
     win_copy_deps_to_target_dir(polycircuit-tests polycircuit::polycircuit)
-endif()
+endif ()
 
 include(GoogleTest)
 gtest_discover_tests(polycircuit-tests)

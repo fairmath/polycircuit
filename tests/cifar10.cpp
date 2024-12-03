@@ -23,7 +23,7 @@ minimim required CKKS params
   "level_budget": [0,0]
 }
 */
-int main(int argc, char* argv[]) try {
+int main(int argc, char *argv[]) try {
     lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
     parameters.SetMultiplicativeDepth(5);
     parameters.SetScalingModSize(25);
@@ -57,12 +57,12 @@ int main(int argc, char* argv[]) try {
     std::cout << "picture is loaded, size = " << in.size() << std::endl;
 
     lbcrypto::Plaintext ptxt = cc->MakeCKKSPackedPlaintext(in);
-    auto c                   = cc->Encrypt(ptxt, keys.publicKey);
+    auto c = cc->Encrypt(ptxt, keys.publicKey);
 
     std::cout << "encrypt data " << std::endl;
 
     auto result = std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
-        polycircuit::cifar10<lbcrypto::DCRTPoly>(cc, std::move(c)).evaluate());
+            polycircuit::cifar10<lbcrypto::DCRTPoly>(cc, std::move(c)).evaluate());
 
     std::cout << "solved CIFAR problem " << std::endl;
 
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) try {
     return EXIT_SUCCESS;
 }
 
-catch (const std::exception& ex) {
+catch (const std::exception &ex) {
     std::cerr << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
