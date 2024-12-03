@@ -21,29 +21,10 @@ minimim required CKKS params
 }
 */
 int main(int argc, char* argv[]) try {
-    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetScalingModSize(25);
-    parameters.SetFirstModSize(30);
-    parameters.SetScalingTechnique(lbcrypto::ScalingTechnique::FLEXIBLEAUTO);
-    parameters.SetBatchSize(4096);
-    parameters.SetRingDim(8192);
+    polycircuit::ckks::Cifar10 cifar10Evaluator;
 
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc = lbcrypto::GenCryptoContext(parameters);
-
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl;
-
-    cc->Enable(lbcrypto::PKESchemeFeature::PKE);
-    cc->Enable(lbcrypto::PKESchemeFeature::KEYSWITCH);
-    cc->Enable(lbcrypto::PKESchemeFeature::LEVELEDSHE);
-    cc->Enable(lbcrypto::PKESchemeFeature::ADVANCEDSHE);
-    cc->Enable(lbcrypto::PKESchemeFeature::FHE);
-
-    auto keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalRotateKeyGen(keys.secretKey, {-3, -2, -1, 10, 20, 40, 50, 100, 200, 400, 800, 1600});
-
-    std::cout << "mul and automorphism keys are gnerated " << std::endl;
+    cifar10Evaluator.GenerateCryptoContext();
+    cifar10Evaluator.KeyGen();
 
     std::ifstream ifs(
         "/Users/gg/projects/fairmath/polycircuit_new/examples/"
@@ -55,18 +36,16 @@ int main(int argc, char* argv[]) try {
 
     std::cout << "picture is loaded, size = " << in.size() << std::endl;
 
-    lbcrypto::Plaintext ptxt = cc->MakeCKKSPackedPlaintext(in);
-    auto c                   = cc->Encrypt(ptxt, keys.publicKey);
+    cifar10Evaluator.EncryptAndAddCipher(in);
 
     std::cout << "encrypt data " << std::endl;
 
-    auto result = std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
-        polycircuit::ckks::Cifar10<lbcrypto::DCRTPoly>(cc, std::move(c)).evaluate());
+    auto result = std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(cifar10Evaluator.evaluate());
 
     std::cout << "solved CIFAR problem " << std::endl;
 
     lbcrypto::Plaintext rptx;
-    cc->Decrypt(result, keys.secretKey, &rptx);
+    cifar10Evaluator.GetCryptoContext()->Decrypt(result, cifar10Evaluator.GetKeys().secretKey, &rptx);
     rptx->SetLength(10);  // 10 classes of image
 
     std::cout << "decrypted result" << std::endl;

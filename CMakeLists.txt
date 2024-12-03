@@ -45,6 +45,7 @@ add_library(polycircuit
         include/polycircuit/matrix_mul/matrix_mul.hpp
         include/polycircuit/shl/shl.hpp
         examples/shl/main.cpp
+        src/ckks_component.cpp
 ) # initialized below
 add_library(polycircuit::polycircuit ALIAS polycircuit)
 
