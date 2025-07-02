@@ -1,32 +1,45 @@
 #pragma once
 
+#include "polycircuit/context.hpp"
 #include "polycircuit/IComponent.hpp"
 
 #include "openfhe/pke/cryptocontext.h"
+#include "openfhe/pke/scheme/ckksrns/gen-cryptocontext-ckksrns-params.h"
 
 namespace polycircuit
 {
 
-template <typename ElementType>
-class SignEvaluation final : public IComponent
+CKKSParams signDefaultParams() {
+    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
+
+    parameters.SetMultiplicativeDepth(10);
+    parameters.SetScalingModSize(50);
+    parameters.SetFirstModSize(55);
+    parameters.SetScalingTechnique(lbcrypto::ScalingTechnique::FIXEDAUTO);
+    parameters.SetBatchSize(4096);
+    parameters.SetRingDim(32768);
+
+    return {parameters, {-2, -1, 1, 2}};
+}
+
+class Sign final : public CKKSComponent
 {
 public:
-    explicit SignEvaluation(lbcrypto::CryptoContext<ElementType>&& cc,
-                            lbcrypto::Ciphertext<ElementType>&& inputC)
-        : m_cc(std::move(cc))
-        , m_inputC(std::move(inputC))
+    explicit Sign(CKKSCryptoContext&& context, CKKSPublicKey&& publicKey)
+        : CKKSComponent(std::move(context), std::move(publicKey))
     { }
-    explicit SignEvaluation(const lbcrypto::CryptoContext<ElementType>& cc,
-                            const lbcrypto::Ciphertext<ElementType>& inputC)
-        : m_cc(cc)
-        , m_inputC(inputC)
-    { }
-    SignEvaluation(const SignEvaluation&) = default;
-    SignEvaluation(SignEvaluation&&) = default;
-    SignEvaluation& operator=(const SignEvaluation&) = default;
-    SignEvaluation& operator=(SignEvaluation&&) = default;
 
-    Ciphertext evaluate() override
+    explicit Sign(const CKKSCryptoContext& context, const CKKSPublicKey& publicKey)
+        : CKKSComponent(context, publicKey)
+    { }
+
+    Sign(const Sign&) = default;
+    Sign(Sign&&) = default;
+    Sign& operator=(const Sign&) = default;
+    Sign& operator=(Sign&&) = default;
+
+private:
+    CKKSCiphertext eval(CKKSCryptoContext cc, CKKSPublicKey publicKey, const CKKSArguments& args) override
     {
         static std::vector<double> coeffVal({
             0.0, 1.273238551875655,       0.0, -0.42441020299615195,    0.0, 0.25464294463091813,
@@ -199,27 +212,26 @@ public:
             0.0, -7.151799921391366e-05,  0.0, 6.555346011130787e-05,   0.0, -5.95901494265071e-05,
         0.0});
 
-        m_cc->Enable(lbcrypto::PKESchemeFeature::ADVANCEDSHE);
+        auto inputC = args.ciphertexts().at(0);
+        CKKSCiphertext outputC = cc->EvalChebyshevSeries(inputC, coeffVal, -1, 1);
 
-        lbcrypto::Ciphertext<ElementType> outputC = m_cc->EvalChebyshevSeries(m_inputC, coeffVal, -1, 1);
-
-        std::vector<lbcrypto::Ciphertext<ElementType>> t(1024);
+        std::vector<CKKSCiphertext> t(1024);
         int l = 512;
-        t[1] = m_inputC;
+        t[1] = inputC;
 
         //--CHEBYSHEV series computation <--- this is very naively implemented---
         for (int i = 2; i < l + 1; i++)
         {
             const int j = (i - 1) / 2 + 1;
-            auto prod = m_cc->EvalMult(t[j], t[i - j]);
-            t[i] = m_cc->EvalAdd(prod, prod);
+            auto prod = cc->EvalMult(t[j], t[i - j]);
+            t[i] = cc->EvalAdd(prod, prod);
             if (2 * j == i)
             {
-                m_cc->EvalSubInPlace(t[i], 1);
+                cc->EvalSubInPlace(t[i], 1);
             }
             else
             {
-                m_cc->EvalSubInPlace(t[i], t[2 * j - i]);
+                cc->EvalSubInPlace(t[i], t[2 * j - i]);
             }
         }
 
@@ -233,25 +245,25 @@ public:
         for (int i = 0; i < len; i++)
         {
             double coeff = coeffVal2[i];
-            auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 64), t[16]);
-            auto temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 32);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[32]);
-            temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 16);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[64]);
-            temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 8);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[128]);
-            temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 4);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[256]);
-            temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff * 2);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[512]);
-            temp2 = m_cc->EvalMult(t[15 - 2 * i], coeff);
-            auto t59 = m_cc->EvalSub(temp1, temp2);
-            outputC = m_cc->EvalAdd(outputC, t59);
+            auto temp1 = cc->EvalMult(cc->EvalMult(t[1 + 2 * i], coeff * 64), t[16]);
+            auto temp2 = cc->EvalMult(t[15 - 2 * i], coeff * 32);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[32]);
+            temp2 = cc->EvalMult(t[15 - 2 * i], coeff * 16);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[64]);
+            temp2 = cc->EvalMult(t[15 - 2 * i], coeff * 8);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[128]);
+            temp2 = cc->EvalMult(t[15 - 2 * i], coeff * 4);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[256]);
+            temp2 = cc->EvalMult(t[15 - 2 * i], coeff * 2);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[512]);
+            temp2 = cc->EvalMult(t[15 - 2 * i], coeff);
+            auto t59 = cc->EvalSub(temp1, temp2);
+            outputC = cc->EvalAdd(outputC, t59);
         }
 
         //----------------------------  T1017,T1019 -----------------------------
@@ -262,29 +274,29 @@ public:
         for (int i = 0; i < len; i++)
         {
             double coeff = coeffVal3[i];
-            auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 128), t[8]);
-            auto temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 64);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[16]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 32);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[32]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 16);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[64]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 8);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[128]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 4);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[256]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff * 2);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[512]);
-            temp2 = m_cc->EvalMult(t[7 - 2 * i], coeff);
-            auto t59 = m_cc->EvalSub(temp1, temp2);
+            auto temp1 = cc->EvalMult(cc->EvalMult(t[1 + 2 * i], coeff * 128), t[8]);
+            auto temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 64);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[16]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 32);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[32]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 16);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[64]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 8);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[128]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 4);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[256]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff * 2);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[512]);
+            temp2 = cc->EvalMult(t[7 - 2 * i], coeff);
+            auto t59 = cc->EvalSub(temp1, temp2);
 
-            outputC = m_cc->EvalAdd(outputC, t59);
+            outputC = cc->EvalAdd(outputC, t59);
         }
 
         //----------------------------  T1021 -----------------------------
@@ -295,32 +307,32 @@ public:
         for (int i = 0; i < len; i++)
         {
             double coeff = coeffVal4[i];
-            auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 256), t[4]);
-            auto temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 128);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[8]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 64);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[16]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 32);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[32]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 16);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[64]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 8);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[128]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 4);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[256]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff * 2);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[512]);
-            temp2 = m_cc->EvalMult(t[3 - 2 * i], coeff);
-            auto t59 = m_cc->EvalSub(temp1, temp2);
+            auto temp1 = cc->EvalMult(cc->EvalMult(t[1 + 2 * i], coeff * 256), t[4]);
+            auto temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 128);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[8]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 64);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[16]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 32);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[32]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 16);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[64]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 8);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[128]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 4);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[256]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff * 2);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[512]);
+            temp2 = cc->EvalMult(t[3 - 2 * i], coeff);
+            auto t59 = cc->EvalSub(temp1, temp2);
 
-            outputC = m_cc->EvalAdd(outputC, t59);
+            outputC = cc->EvalAdd(outputC, t59);
         }
 
         //----------------------------  T1023 -----------------------------
@@ -331,42 +343,38 @@ public:
         for (int i = 0; i < len; i++)
         {
             double coeff = coeffVal5[i];
-            auto temp1 = m_cc->EvalMult(m_cc->EvalMult(t[1 + 2 * i], coeff * 512), t[2]);
-            auto temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 256);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[4]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 128);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[8]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 64);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[16]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 32);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[32]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 16);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[64]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 8);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[128]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 4);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[256]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff * 2);
-            temp1 = m_cc->EvalSub(temp1, temp2);
-            temp1 = m_cc->EvalMult(temp1, t[512]);
-            temp2 = m_cc->EvalMult(t[1 - 2 * i], coeff);
-            auto t59 = m_cc->EvalSub(temp1, temp2);
+            auto temp1 = cc->EvalMult(cc->EvalMult(t[1 + 2 * i], coeff * 512), t[2]);
+            auto temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 256);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[4]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 128);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[8]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 64);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[16]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 32);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[32]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 16);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[64]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 8);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[128]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 4);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[256]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff * 2);
+            temp1 = cc->EvalSub(temp1, temp2);
+            temp1 = cc->EvalMult(temp1, t[512]);
+            temp2 = cc->EvalMult(t[1 - 2 * i], coeff);
+            auto t59 = cc->EvalSub(temp1, temp2);
 
-            outputC = m_cc->EvalAdd(outputC, t59);
+            outputC = cc->EvalAdd(outputC, t59);
         }
-        return Ciphertext(std::move(outputC));
+        return outputC;
     }
-
-private:
-    lbcrypto::CryptoContext<ElementType> m_cc;
-    lbcrypto::Ciphertext<ElementType> m_inputC;
 };
 
 } // polycircuit

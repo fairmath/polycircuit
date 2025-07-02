@@ -1,9 +1,11 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
-#include "polycircuit/component/CIFAR10ImageClassification/CIFAR10ImageClassification.hpp"
+#include "polycircuit/component/ml/cifar10/cifar10.hpp"
 
 #include <openfhe/pke/constants-defs.h>
+#include <openfhe/pke/encoding/plaintext-fwd.h>
 #include <openfhe/pke/cryptocontext.h>
 #include <openfhe/pke/openfhe.h>
 #include <openfhe/pke/scheme/ckksrns/gen-cryptocontext-ckksrns-params.h>
@@ -47,33 +49,6 @@ int main(int argc, char *argv[]) try
         throw std::runtime_error("Input file(--input) is not specified.");
     }
 
-    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(5);
-    parameters.SetScalingModSize(25);
-    parameters.SetFirstModSize(30);
-    parameters.SetScalingTechnique(lbcrypto::ScalingTechnique::FLEXIBLEAUTO);
-    parameters.SetBatchSize(4096);
-    parameters.SetRingDim(8192);
-
-    lbcrypto::CryptoContext<lbcrypto::DCRTPoly> cc = lbcrypto::GenCryptoContext(parameters);
-
-    std::cout << "CKKS scheme is using ring dimension " << cc->GetRingDimension() << std::endl;
-
-    cc->Enable(lbcrypto::PKESchemeFeature::PKE);
-    cc->Enable(lbcrypto::PKESchemeFeature::KEYSWITCH);
-    cc->Enable(lbcrypto::PKESchemeFeature::LEVELEDSHE);
-    cc->Enable(lbcrypto::PKESchemeFeature::ADVANCEDSHE);
-    cc->Enable(lbcrypto::PKESchemeFeature::FHE);
-
-    auto keys = cc->KeyGen();
-    cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalRotateKeyGen(
-        keys.secretKey, 
-       {-3, -2, -1, 10, 20, 40, 50, 100, 200, 400, 800, 1600}
-    );
-
-    std::cout << "mul and automorphism keys are gnerated " << std::endl;
-
     std::ifstream ifs(vm["input"].as<const std::string&>(), std::ios::in);
     if (!ifs.is_open())
     {
@@ -86,24 +61,21 @@ int main(int argc, char *argv[]) try
 
     std::cout << "picture is loaded, size = " << in.size() << std::endl;
 
-    lbcrypto::Plaintext ptxt = cc->MakeCKKSPackedPlaintext(in);
-    auto c = cc->Encrypt(ptxt, keys.publicKey);
+    auto context = polycircuit::createCKKSContext(polycircuit::cifar10DefaultParams());
+    auto keys = context.keys;
+    auto cifar10 = polycircuit::Cifar10(context.cc, keys.publicKey);
+
+    auto c = context.encrypt(in);
 
     std::cout << "encrypt data " << std::endl;
 
-    auto result = std::get<lbcrypto::Ciphertext<lbcrypto::DCRTPoly>>(
-        polycircuit::CIFAR10ImageClassification<lbcrypto::DCRTPoly>(cc, std::move(c)).evaluate()
-    );
+    polycircuit::CKKSArguments args(std::vector<polycircuit::CKKSCiphertext>{c});
+    auto result = cifar10.evaluate(args);
 
     std::cout << "solved CIFAR problem " << std::endl ;
 
-    lbcrypto::Plaintext rptx;
-    cc->Decrypt(result, keys.secretKey, &rptx);
-    rptx->SetLength(10); // 10 classes of image
-
+    auto classes = context.decrypt(result, keys.secretKey, 10);
     std::cout << "decrypted result" << std::endl ;
-
-    auto classes = rptx->GetRealPackedValue();
     std::for_each(classes.begin(), classes.end(), [](double e){ std::cout << e << " "; });
     std::cout << std::endl;
     
