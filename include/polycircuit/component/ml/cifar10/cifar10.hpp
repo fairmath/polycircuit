@@ -13,6 +13,9 @@
 namespace polycircuit
 {
 
+namespace ml 
+{
+
 CKKSParams cifar10DefaultParams() {
     lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
 
@@ -193,5 +196,6 @@ private:
     }
 };
 
+} // ml
 } // polycircuit
 

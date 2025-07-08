@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) try
 
     std::cout << "picture is loaded, size = " << in.size() << std::endl;
 
-    auto context = polycircuit::createCKKSContext(polycircuit::cifar10DefaultParams());
+    auto context = polycircuit::createCKKSContext(polycircuit::ml::cifar10DefaultParams());
     auto keys = context.keys;
-    auto cifar10 = polycircuit::Cifar10(context.cc, keys.publicKey);
+    auto cifar10 = polycircuit::ml::Cifar10(context.cc, keys.publicKey);
 
     auto c = context.encrypt(in);
 

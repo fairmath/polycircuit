@@ -1,12 +1,15 @@
 #pragma once
 
+#include "polycircuit/context.hpp"
 #include "polycircuit/IComponent.hpp"
 
 #include "openfhe/pke/cryptocontext.h"
-
-#include <complex>
+#include "openfhe/pke/scheme/ckksrns/gen-cryptocontext-ckksrns-params.h"
 
 namespace polycircuit
+{
+
+namespace func 
 {
 
 CKKSParams reluDefaultParams() {
@@ -171,4 +174,5 @@ private:
     }
 };
 
+} // func
 } // polycircuit

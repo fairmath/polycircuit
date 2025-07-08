@@ -8,8 +8,11 @@
 
 namespace polycircuit
 {
+namespace func 
+{
 
-CKKSParams signDefaultParams() {
+CKKSParams signDefaultParams() 
+{
     lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
 
     parameters.SetMultiplicativeDepth(10);
@@ -377,5 +380,6 @@ private:
     }
 };
 
+} // func
 } // polycircuit
 

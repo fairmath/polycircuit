@@ -1,10 +1,11 @@
-#include "polycircuit/component/func/relu/relu.hpp"
+#include "polycircuit/component/func/relu.hpp"
 
 #include <openfhe/pke/cryptocontext-ser.h>
 #include <boost/program_options.hpp>
 #include <iostream>
 
 namespace po = boost::program_options;
+namespace polyfunc = polycircuit::func;
 
 int main(int argc, char *argv[]) try
 {
@@ -24,7 +25,7 @@ int main(int argc, char *argv[]) try
     }
     if (!vm.count("input"))
     {
-        throw std::runtime_error("Specify input array: --input=\"0.1, -0.1, 0\"");
+        throw std::runtime_error("Specify space separated input array: --input=\"0.1 -0.1 0\"");
     }
 
     std::stringstream ss(vm["input"].as<std::string>());
@@ -36,10 +37,12 @@ int main(int argc, char *argv[]) try
         });
 
     std::cout << "read array: " << in.size() << std::endl;
+    std::for_each(in.begin(), in.end(), [](double e){ std::cout << e << " "; });
+    std::cout << std::endl;
 
-    auto context = polycircuit::createCKKSContext(polycircuit::reluDefaultParams());
+    auto context = polycircuit::createCKKSContext(polyfunc::reluDefaultParams());
     auto keys = context.keys;
-    auto relu = polycircuit::ReLU(context.cc, keys.publicKey);
+    auto relu = polyfunc::ReLU(context.cc, keys.publicKey);
 
     auto c = context.encrypt(in);
 

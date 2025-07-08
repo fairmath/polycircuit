@@ -1,10 +1,11 @@
-#include "polycircuit/component/func/sign/sign.hpp"
+#include "polycircuit/component/sign/sign.hpp"
 
 #include <openfhe/pke/cryptocontext-ser.h>
 #include <boost/program_options.hpp>
 #include <iostream>
 
 namespace po = boost::program_options;
+namespace polyfunc = polycircuit::func;
 
 int main(int argc, char *argv[]) try
 {
@@ -37,9 +38,9 @@ int main(int argc, char *argv[]) try
 
     std::cout << "read array: " << in.size() << std::endl;
 
-    auto context = polycircuit::createCKKSContext(polycircuit::signDefaultParams());
+    auto context = polycircuit::createCKKSContext(polyfunc::signDefaultParams());
     auto keys = context.keys;
-    auto sign = polycircuit::Sign(context.cc, keys.publicKey);
+    auto sign = polyfunc::Sign(context.cc, keys.publicKey);
 
     auto c = context.encrypt(in);
 
