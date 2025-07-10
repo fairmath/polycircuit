@@ -1,90 +1,99 @@
 #pragma once
 
+#include "polycircuit/context.hpp"
 #include "polycircuit/IComponent.hpp"
 
 #include "openfhe/pke/cryptocontext.h"
+#include "openfhe/pke/scheme/ckksrns/gen-cryptocontext-ckksrns-params.h"
 
 namespace polycircuit
 {
+namespace algo 
+{
 
-template <typename ElementType>
-class LookupTable final : public IComponent
+CKKSParams lookupDefaultParams()
+{
+    lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
+    parameters.SetMultiplicativeDepth(17);
+    parameters.SetBatchSize(2048);
+    parameters.SetScalingModSize(55);
+    parameters.SetFirstModSize(60);
+    parameters.SetScalingTechnique(lbcrypto::ScalingTechnique::FLEXIBLEAUTO);
+    parameters.SetRingDim(131072);
+
+    return {parameters, {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, -2047}};
+}
+
+class LookupTable final : public CKKSComponent
 {
 public:
-    explicit LookupTable(lbcrypto::CryptoContext<ElementType>&& cc,
-        lbcrypto::Ciphertext<ElementType>&& indexC,
-        lbcrypto::Ciphertext<ElementType>&& arrayC)
-        : m_cc(std::move(cc))
-        , m_indexC(std::move(indexC))
-        , m_arrayC(std::move(arrayC))
+    explicit LookupTable(CKKSCryptoContext&& context, CKKSPublicKey&& publicKey)
+        : CKKSComponent(std::move(context), std::move(publicKey))
     { }
-    explicit LookupTable(const lbcrypto::CryptoContext<ElementType>& cc,
-        const lbcrypto::Ciphertext<ElementType>& indexC,
-        lbcrypto::Ciphertext<ElementType>& arrayC)
-        : m_cc(cc)
-        , m_indexC(indexC)
-        , m_arrayC(arrayC)
+
+    explicit LookupTable(const CKKSCryptoContext& context, const CKKSPublicKey& publicKey)
+        : CKKSComponent(context, publicKey)
     { }
+
     LookupTable(const LookupTable&) = default;
     LookupTable(LookupTable&&) = default;
     LookupTable& operator=(const LookupTable&) = default;
     LookupTable& operator=(LookupTable&&) = default;
 
-    Ciphertext evaluate() override
+private:
+    CKKSCiphertext eval(CKKSCryptoContext cc, CKKSPublicKey publicKey, const CKKSArguments& args) override
     {
-        lbcrypto::Ciphertext<ElementType> tempIndexCtx = m_cc->EvalRotate(m_indexC, -2047);
+        auto arrayC = args.ciphertexts().at(0);
+        auto indexC = args.ciphertexts().at(1);
+
+        auto tempIndexCtx = cc->EvalRotate(indexC, -2047);
 
         int rotateIndex = 1;
         for (int i = 0; i < 11; i++)
         {
-            m_cc->EvalAddInPlace(tempIndexCtx, m_cc->EvalRotate(tempIndexCtx, rotateIndex));
+            cc->EvalAddInPlace(tempIndexCtx, cc->EvalRotate(tempIndexCtx, rotateIndex));
             rotateIndex <<= 1;
         }
 
-        lbcrypto::Ciphertext<ElementType> eqCtx = evalEqual(std::move(tempIndexCtx));
-        lbcrypto::Ciphertext<ElementType> tempResultCtx = m_cc->EvalMult(std::move(eqCtx), m_arrayC);
+        auto eqCtx = evalEqual(cc, publicKey, std::move(tempIndexCtx));
+        auto tempResultCtx = cc->EvalMult(std::move(eqCtx), arrayC);
 
         rotateIndex = 1;
         for (int i = 0; i < 11; i++)
         {
-            m_cc->EvalAddInPlace(tempResultCtx, m_cc->EvalRotate(tempResultCtx, rotateIndex));
+            cc->EvalAddInPlace(tempResultCtx, cc->EvalRotate(tempResultCtx, rotateIndex));
             rotateIndex <<= 1;
         }
-        return Ciphertext(std::move(tempResultCtx));
+
+        return tempResultCtx;
     }
 
-private:
-    lbcrypto::Ciphertext<ElementType> evalEqual(lbcrypto::Ciphertext<ElementType>&& base) const
+    CKKSCiphertext evalEqual(CKKSCryptoContext cc, CKKSPublicKey publicKey, CKKSCiphertext&& base) const
     {
-        lbcrypto::Ciphertext<ElementType> result = m_cc->EvalSquare(m_cc->EvalAdd(std::move(base), seqPtxt()));
+        auto result = cc->EvalSquare(cc->EvalAdd(std::move(base), seqPtxt(cc)));
 
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 2; i++)
         {
-            m_cc->EvalSquareInPlace(result);
+            cc->EvalSquareInPlace(result);
         }
 
-        std::vector<int64_t> ones(2048, 1);
-        lbcrypto::Plaintext onesPtxt = m_cc->MakePackedPlaintext(ones);
+        std::vector<double> ones(2048, 1.0);
+        auto onesPtxt = cc->MakeCKKSPackedPlaintext(ones);
 
-        return m_cc->EvalSub(std::move(onesPtxt), std::move(result));
+        return cc->EvalSub(onesPtxt, std::move(result));
     }
 
-    lbcrypto::Plaintext seqPtxt() const
+    lbcrypto::Plaintext seqPtxt(CKKSCryptoContext cc) const
     {
-        std::vector<int64_t> result;
+        std::vector<double> result;
         result.reserve(2048);
         for (int64_t i = 0; i < 2048; ++i)
         {
-            result.push_back(-i);
+            result.push_back(static_cast<double>(-i));
         }
-        return m_cc->MakePackedPlaintext(result);
+        return cc->MakeCKKSPackedPlaintext(result);
     }
-
-private:
-    lbcrypto::CryptoContext<ElementType> m_cc;
-    lbcrypto::Ciphertext<ElementType> m_indexC;
-    lbcrypto::Ciphertext<ElementType> m_arrayC;
 };
 
+} // algo
 } // polycircuit
-
